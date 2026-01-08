@@ -1,0 +1,92 @@
+name: iOS Build (Unsigned IPA)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      - name: Install JS dependencies
+        run: npm install --legacy-peer-deps || true
+        
+      - name: Expo prebuild iOS
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+
+      - name: Archive iOS app (unsigned)
+        run: |
+          cd ios
+          xcodebuild archive \
+            -workspace Papillon.xcworkspace \
+            -scheme Papillon \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Papillon.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM= \
+            SKIP_INSTALL=NO
+
+      - name: Create IPA
+        run: |
+          cd ios/build
+          mkdir Payload
+          cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
+          zip -r Papillon.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Papillon.ipa
+          path: ios/build/Papillon.ipa
+
+
+      - name: Create Git tag
+        run: |
+          TAG="build-${GITHUB_RUN_NUMBER}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $TAG
+          git push origin $TAG
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "build-${{ github.run_number }}"
+          name: "Papillon Build #${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ios/build/Papillon.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ios/build/Papillon.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
