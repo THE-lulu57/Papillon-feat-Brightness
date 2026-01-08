@@ -11,20 +11,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Notify start on Telegram
-        run: |
-          MESSAGE="🦋 *Starting a build for a beta version*
-
-          📦 ${{ github.repository }} (${{ github.ref_name }})
-          👤 ${{ github.actor }} | Run #${{ github.run_number }}
-          📅 $(date -u +'%Y-%m-%d %H:%M UTC')
-          🔗 [Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d parse_mode=Markdown \
-            -d text="$MESSAGE"
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
