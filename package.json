@@ -50,7 +50,7 @@
     "expo-audio": "~1.1.1",
     "expo-battery": "~10.0.7",
     "expo-blur": "~15.0.7",
-    "expo-brightness": "14.0.8",
+    "expo-brightness": "~14.0.8",
     "expo-build-properties": "~1.0.9",
     "expo-camera": "~17.0.8",
     "expo-crypto": "~15.0.7",
