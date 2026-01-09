@@ -46,7 +46,7 @@ export default function QRCodePage() {
         }
         await Brightness.setBrightnessAsync(1);
       } catch (error) {
-        console.warn("Failed to set brightness on value 1");
+        console.warn("Failed to set brightness:", error);
       }
     };
 
@@ -55,7 +55,9 @@ export default function QRCodePage() {
         if (previousBrightness.current !== null) {
           await Brightness.setBrightnessAsync(previousBrightness.current);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.warn("Failed to restore brightness:", error);
+      }
     };
 
     enableBrightness();
@@ -64,7 +66,7 @@ export default function QRCodePage() {
       if (nextAppState.match(/inactive|background/)) {
         restoreBrightness();
       } else if (nextAppState === "active") {
-        Brightness.setBrightnessAsync(1);
+        enableBrightness();
       }
     });
 
