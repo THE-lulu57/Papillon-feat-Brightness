@@ -3,8 +3,8 @@ import Typography from "@/ui/components/Typography";
 import { Phone } from "@getpapillon/papicons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Dimensions, Image, Platform, View } from "react-native";
-import React from "react";
+import { Dimensions, Image, Platform, View, AppState } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import Reanimated, {
   FlipInEasyX,
   runOnJS,
@@ -19,6 +19,7 @@ import Barcode, { Format } from "@aramir/react-native-barcode";
 import QRCode from "react-native-qrcode-svg";
 import { getServiceBackground } from "@/utils/services/helper";
 import { Services } from "@/stores/account/types";
+import * as Brightness from "expo-brightness";
 
 export default function QRCodePage() {
 
@@ -34,6 +35,48 @@ export default function QRCodePage() {
   const scale = useSharedValue(1);
 
   const finalTranslation = Dimensions.get("window").height / 2;
+
+  const previousBrightness = useRef<number | null>(null);
+
+  useEffect(() => {
+    const enableBrightness = async () => {
+      const { status } = await Brightness.requestPermissionsAsync();
+      if (status !== "granted") return;
+
+      if (previousBrightness.current === null) {
+        previousBrightness.current = await Brightness.getBrightnessAsync();
+      }
+
+      await Brightness.setBrightnessAsync(1);
+    };
+
+    const restoreBrightness = async () => {
+      if (previousBrightness.current !== null) {
+        const { status } = await Brightness.requestPermissionsAsync();
+        if (status === "granted") {
+          await Brightness.setBrightnessAsync(previousBrightness.current);
+        }
+      }
+    };
+
+    enableBrightness();
+
+    const subscription = AppState.addEventListener("change", async (nextAppState) => {
+      if (nextAppState.match(/inactive|background/)) {
+        await restoreBrightness();
+      } else if (nextAppState === "active") {
+        const { status } = await Brightness.requestPermissionsAsync();
+        if (status === "granted") {
+          await Brightness.setBrightnessAsync(1);
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+      restoreBrightness();
+    };
+  }, []);
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
