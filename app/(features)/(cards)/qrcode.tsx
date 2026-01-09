@@ -4,7 +4,7 @@ import { Phone } from "@getpapillon/papicons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Dimensions, Image, Platform, View, AppState } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Reanimated, {
   FlipInEasyX,
   runOnJS,
@@ -38,45 +38,41 @@ export default function QRCodePage() {
 
   const previousBrightness = useRef<number | null>(null);
 
-  useEffect(() => {
-    const enableBrightness = async () => {
-      const { status } = await Brightness.requestPermissionsAsync();
-      if (status !== "granted") return;
-
+useEffect(() => {
+  const enableBrightness = async () => {
+    try {
       if (previousBrightness.current === null) {
         previousBrightness.current = await Brightness.getBrightnessAsync();
       }
-
       await Brightness.setBrightnessAsync(1);
-    };
+    } catch (error) {
+      console.warn("Failed to set brightness on value 1");
+    }
+  };
 
-    const restoreBrightness = async () => {
+  const restoreBrightness = async () => {
+    try {
       if (previousBrightness.current !== null) {
-        const { status } = await Brightness.requestPermissionsAsync();
-        if (status === "granted") {
-          await Brightness.setBrightnessAsync(previousBrightness.current);
-        }
+        await Brightness.setBrightnessAsync(previousBrightness.current);
       }
-    };
+    } catch (error) {}
+  };
 
-    enableBrightness();
+  enableBrightness();
 
-    const subscription = AppState.addEventListener("change", async (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
-        await restoreBrightness();
-      } else if (nextAppState === "active") {
-        const { status } = await Brightness.requestPermissionsAsync();
-        if (status === "granted") {
-          await Brightness.setBrightnessAsync(1);
-        }
-      }
-    });
-
-    return () => {
-      subscription.remove();
+  const subscription = AppState.addEventListener("change", (nextAppState) => {
+    if (nextAppState.match(/inactive|background/)) {
       restoreBrightness();
-    };
-  }, []);
+    } else if (nextAppState === "active") {
+      Brightness.setBrightnessAsync(1);
+    }
+  });
+
+  return () => {
+    subscription.remove();
+    restoreBrightness();
+  };
+}, []);
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
@@ -100,13 +96,11 @@ export default function QRCodePage() {
       scale.value = withSpring(1, { damping: 150, stiffness: 1500 });
     });
 
-
   return (
-    <GestureDetector
-      gesture={panGesture}
-    >
-      <BlurView style={{ flex: 1, backgroundColor: Platform.OS === "ios" ? undefined : "#000" }}
-                tint={"dark"}
+    <GestureDetector gesture={panGesture}>
+      <BlurView
+        style={{ flex: 1, backgroundColor: Platform.OS === "ios" ? undefined : "#000" }}
+        tint={"dark"}
       >
         <Reanimated.View
           entering={ZoomInDown.springify()}
@@ -152,7 +146,7 @@ export default function QRCodePage() {
               style={{
                 padding: 15,
                 backgroundColor: "#FFF",
-                borderRadius: type === "QR" ? 15:20,
+                borderRadius: type === "QR" ? 15 : 20,
               }}
             >
               {type === "QR" ? (
@@ -172,20 +166,19 @@ export default function QRCodePage() {
             </View>
           </Reanimated.View>
 
-          <Stack
-            style={{ width: 240 }}
-            hAlign="center"
-          >
+          <Stack style={{ width: 240 }} hAlign="center">
             <Phone fill={"#FFFFFF"} />
-            <Typography variant="body2"
-                        align="center"
-                        color="#FFFFFF"
-            >{t("Profile_Cards_Scan_Orientation")}</Typography>
+            <Typography
+              variant="body2"
+              align="center"
+              color="#FFFFFF"
+            >
+              {t("Profile_Cards_Scan_Orientation")}
+            </Typography>
           </Stack>
         </Reanimated.View>
-        <OnboardingBackButton icon={"Cross"}
-                              position={"right"}
-        />
+
+        <OnboardingBackButton icon={"Cross"} position={"right"} />
       </BlurView>
     </GestureDetector>
   );
