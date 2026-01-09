@@ -4,7 +4,7 @@ import { Phone } from "@getpapillon/papicons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Dimensions, Image, Platform, View, AppState } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Reanimated, {
   FlipInEasyX,
   runOnJS,
@@ -40,35 +40,31 @@ export default function QRCodePage() {
 
   useEffect(() => {
     const enableBrightness = async () => {
-      const { status } = await Brightness.requestPermissionsAsync();
-      if (status !== "granted") return;
-
-      if (previousBrightness.current === null) {
-        previousBrightness.current = await Brightness.getBrightnessAsync();
+      try {
+        if (previousBrightness.current === null) {
+          previousBrightness.current = await Brightness.getBrightnessAsync();
+        }
+        await Brightness.setBrightnessAsync(1);
+      } catch (error) {
+        console.warn("Failed to set brightness on value 1");
       }
-
-      await Brightness.setBrightnessAsync(1);
     };
 
     const restoreBrightness = async () => {
-      if (previousBrightness.current !== null) {
-        const { status } = await Brightness.requestPermissionsAsync();
-        if (status === "granted") {
+      try {
+        if (previousBrightness.current !== null) {
           await Brightness.setBrightnessAsync(previousBrightness.current);
         }
-      }
+      } catch (error) {}
     };
 
     enableBrightness();
 
-    const subscription = AppState.addEventListener("change", async (nextAppState) => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState.match(/inactive|background/)) {
-        await restoreBrightness();
+        restoreBrightness();
       } else if (nextAppState === "active") {
-        const { status } = await Brightness.requestPermissionsAsync();
-        if (status === "granted") {
-          await Brightness.setBrightnessAsync(1);
-        }
+        Brightness.setBrightnessAsync(1);
       }
     });
 
