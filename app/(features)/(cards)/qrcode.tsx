@@ -19,7 +19,8 @@ import Barcode, { Format } from "@aramir/react-native-barcode";
 import QRCode from "react-native-qrcode-svg";
 import { getServiceBackground } from "@/utils/services/helper";
 import { Services } from "@/stores/account/types";
-import * as Brightness from "expo-brightness";
+import { getBrightnessAsync, setBrightnessAsync } from "expo-brightness";
+import { warn } from "@/utils/logger/logger";
 
 export default function QRCodePage() {
 
@@ -42,28 +43,28 @@ export default function QRCodePage() {
     const enableBrightness = async () => {
       try {
         if (previousBrightness.current === null) {
-          previousBrightness.current = await Brightness.getBrightnessAsync();
+          previousBrightness.current = await getBrightnessAsync();
         }
-        await Brightness.setBrightnessAsync(1);
+        await setBrightnessAsync(1);
       } catch (error) {
-        console.warn("Failed to set brightness:", error);
+        warn("Failed to set brightness:");
       }
     };
 
     const restoreBrightness = async () => {
       try {
         if (previousBrightness.current !== null) {
-          await Brightness.setBrightnessAsync(previousBrightness.current);
+          await setBrightnessAsync(previousBrightness.current);
         }
       } catch (error) {
-        console.warn("Failed to restore brightness:", error);
+        warn("Failed to restore brightness:");
       }
     };
 
     enableBrightness();
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
+      if (nextAppState === "inactive" || nextAppState === "background" ) {
         restoreBrightness();
       } else if (nextAppState === "active") {
         enableBrightness();
@@ -71,8 +72,8 @@ export default function QRCodePage() {
     });
 
     return () => {
-      subscription.remove();
       restoreBrightness();
+      subscription.remove();
     };
   }, []);
 
@@ -98,13 +99,11 @@ export default function QRCodePage() {
       scale.value = withSpring(1, { damping: 150, stiffness: 1500 });
     });
 
-
   return (
-    <GestureDetector
-      gesture={panGesture}
-    >
-      <BlurView style={{ flex: 1, backgroundColor: Platform.OS === "ios" ? undefined : "#000" }}
-                tint={"dark"}
+    <GestureDetector gesture={panGesture}>
+      <BlurView
+        style={{ flex: 1, backgroundColor: Platform.OS === "ios" ? undefined : "#000" }}
+        tint={"dark"}
       >
         <Reanimated.View
           entering={ZoomInDown.springify()}
@@ -150,7 +149,7 @@ export default function QRCodePage() {
               style={{
                 padding: 15,
                 backgroundColor: "#FFF",
-                borderRadius: type === "QR" ? 15:20,
+                borderRadius: type === "QR" ? 15 : 20,
               }}
             >
               {type === "QR" ? (
@@ -170,20 +169,19 @@ export default function QRCodePage() {
             </View>
           </Reanimated.View>
 
-          <Stack
-            style={{ width: 240 }}
-            hAlign="center"
-          >
+          <Stack style={{ width: 240 }} hAlign="center">
             <Phone fill={"#FFFFFF"} />
-            <Typography variant="body2"
-                        align="center"
-                        color="#FFFFFF"
-            >{t("Profile_Cards_Scan_Orientation")}</Typography>
+            <Typography
+              variant="body2"
+              align="center"
+              color="#FFFFFF"
+            >
+              {t("Profile_Cards_Scan_Orientation")}
+            </Typography>
           </Stack>
         </Reanimated.View>
-        <OnboardingBackButton icon={"Cross"}
-                              position={"right"}
-        />
+
+        <OnboardingBackButton icon={"Cross"} position={"right"} />
       </BlurView>
     </GestureDetector>
   );
