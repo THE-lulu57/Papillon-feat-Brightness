@@ -19,7 +19,8 @@ import Barcode, { Format } from "@aramir/react-native-barcode";
 import QRCode from "react-native-qrcode-svg";
 import { getServiceBackground } from "@/utils/services/helper";
 import { Services } from "@/stores/account/types";
-import * as Brightness from "expo-brightness";
+import { getBrightnessAsync, setBrightnessAsync } from "expo-brightness";
+import { warn } from "@/utils/logger/logger";
 
 export default function QRCodePage() {
 
@@ -38,41 +39,43 @@ export default function QRCodePage() {
 
   const previousBrightness = useRef<number | null>(null);
 
-useEffect(() => {
-  const enableBrightness = async () => {
-    try {
-      if (previousBrightness.current === null) {
-        previousBrightness.current = await Brightness.getBrightnessAsync();
+  useEffect(() => {
+    const enableBrightness = async () => {
+      try {
+        if (previousBrightness.current === null) {
+          previousBrightness.current = await getBrightnessAsync();
+        }
+        await setBrightnessAsync(1);
+      } catch (error) {
+        warn("Failed to set brightness:");
       }
-      await Brightness.setBrightnessAsync(1);
-    } catch (error) {
-      console.warn("Failed to set brightness on value 1");
-    }
-  };
+    };
 
-  const restoreBrightness = async () => {
-    try {
-      if (previousBrightness.current !== null) {
-        await Brightness.setBrightnessAsync(previousBrightness.current);
+    const restoreBrightness = async () => {
+      try {
+        if (previousBrightness.current !== null) {
+          await setBrightnessAsync(previousBrightness.current);
+        }
+      } catch (error) {
+        warn("Failed to restore brightness:");
       }
-    } catch (error) {}
-  };
+    };
 
-  enableBrightness();
+    enableBrightness();
 
-  const subscription = AppState.addEventListener("change", (nextAppState) => {
-    if (nextAppState.match(/inactive|background/)) {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "inactive" || nextAppState === "background" ) {
+        restoreBrightness();
+      } else if (nextAppState === "active") {
+        enableBrightness();
+      }
+    });
+
+    return () => {
+      subscription.remove();
       restoreBrightness();
-    } else if (nextAppState === "active") {
-      Brightness.setBrightnessAsync(1);
-    }
-  });
-
-  return () => {
-    subscription.remove();
-    restoreBrightness();
-  };
-}, []);
+    };
+  }, []);
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
