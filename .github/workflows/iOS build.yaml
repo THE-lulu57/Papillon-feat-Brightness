@@ -58,35 +58,3 @@ jobs:
           name: Papillon.ipa
           path: ios/build/Papillon.ipa
 
-
-      - name: Create Git tag
-        run: |
-          TAG="build-${GITHUB_RUN_NUMBER}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG
-          git push origin $TAG
-        env:
-          GITHUB_RUN_NUMBER: ${{ github.run_number }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "build-${{ github.run_number }}"
-          name: "Papillon Build #${{ github.run_number }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload IPA to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ios/build/Papillon.ipa
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload IPA to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ios/build/Papillon.ipa
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
