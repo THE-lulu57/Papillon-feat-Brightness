@@ -1,6 +1,6 @@
-name: iOS Build (Release IPA)
 
-# 🔹 Build uniquement manuellement
+name: iOS Build (Unsigned IPA)
+
 on:
   workflow_dispatch:
 
@@ -9,10 +9,8 @@ jobs:
     runs-on: macos-26
 
     steps:
-      # 🔹 Récupérer le code
       - uses: actions/checkout@v4
 
-      # 🔹 Installer Node et Bun
       - name: Install Node
         uses: actions/setup-node@v4
         with:
@@ -22,23 +20,17 @@ jobs:
         run: |
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
-
-      # 🔹 Installer dépendances JS
-      - name: Install deps
+      - name: Install JS dependencies
         run: npm install --legacy-peer-deps || true
+        
+      - name: Expo prebuild iOS
+        run: npx expo prebuild --platform ios --clean
 
-      # 🔹 CocoaPods
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
-
-      # 🔹 Prebuild Expo
-      - name: Prebuild Expo
-        run: npx expo prebuild --platform ios --clean
-
-      # 🔹 ARCHIVE Release
-      - name: Archive iOS app (Release, unsigned)
+      - name: Archive iOS app (unsigned)
         run: |
           cd ios
           xcodebuild archive \
@@ -51,37 +43,14 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM= \
             SKIP_INSTALL=NO
-
-      # 🔹 Création IPA
       - name: Create IPA
         run: |
           cd ios/build
           mkdir Payload
           cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
           zip -r Papillon.ipa Payload
-
-      # 🔹 Upload IPA en artifact GitHub
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: Papillon.ipa
           path: ios/build/Papillon.ipa
-
-      # 🔹 Créer une Release GitHub et attacher l'IPA
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "build-${{ github.run_number }}"
-          name: "Papillon Build #${{ github.run_number }}"
-          body: "Build Release automatique de l'IPA"
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload IPA to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ios/build/Papillon.ipa
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
