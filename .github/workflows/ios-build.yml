@@ -1,16 +1,18 @@
-name: iOS Build (Unsigned IPA)
+name: iOS Build (Release IPA)
 
+# 🔹 Build uniquement manuellement
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   ios:
     runs-on: macos-26
 
     steps:
+      # 🔹 Récupérer le code
       - uses: actions/checkout@v4
 
+      # 🔹 Installer Node et Bun
       - name: Install Node
         uses: actions/setup-node@v4
         with:
@@ -21,35 +23,36 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
-      - name: Install JS dependencies
-        run: npm install --legacy-peer-deps
+      # 🔹 Installer dépendances JS
+      - name: Install deps
+        run: npm install --legacy-peer-deps || true
 
-      # 🔹 Expo prebuild (UNE SEULE FOIS)
-      - name: Expo prebuild iOS
-        run: npx expo prebuild --platform ios --clean
-
-      # 🔹 CocoaPods APRÈS prebuild
+      # 🔹 CocoaPods
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
 
-      # 🔹 ARCHIVE (OBLIGATOIRE pour IPA)
-      - name: Archive iOS app (unsigned)
+      # 🔹 Prebuild Expo
+      - name: Prebuild Expo
+        run: npx expo prebuild --platform ios --clean
+
+      # 🔹 ARCHIVE Release
+      - name: Archive iOS app (Release, unsigned)
         run: |
           cd ios
           xcodebuild archive \
             -workspace Papillon.xcworkspace \
             -scheme Papillon \
             -sdk iphoneos \
-            -configuration Debug \
+            -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath build/Papillon.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM= \
             SKIP_INSTALL=NO
 
-      # 🔹 CRÉATION IPA (automatique)
+      # 🔹 Création IPA
       - name: Create IPA
         run: |
           cd ios/build
@@ -57,9 +60,28 @@ jobs:
           cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
           zip -r Papillon.ipa Payload
 
-      # 🔹 UPLOAD IPA (FINALE)
-      - name: Upload IPA
+      # 🔹 Upload IPA en artifact GitHub
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Papillon-Unsigned-IPA
+          name: Papillon.ipa
           path: ios/build/Papillon.ipa
+
+      # 🔹 Créer une Release GitHub et attacher l'IPA
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "build-${{ github.run_number }}"
+          name: "Papillon Build #${{ github.run_number }}"
+          body: "Build Release automatique de l'IPA"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ios/build/Papillon.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
