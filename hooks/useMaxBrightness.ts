@@ -4,10 +4,6 @@ import {setBrightnessAsync, getBrightnessAsync} from "expo-brightness"
 import { warn } from "@/utils/logger/logger";
 
 export function useMaxBrightness() {
-
-  const previousBrightness = useRef<number | null>(null);
-
-export function useMaxBrightness() {
   const previousBrightness = useRef<number | null>(null);
   const isMounted = useRef(true);
   const isRestoring = useRef(false); // 👈 Nouveau flag
