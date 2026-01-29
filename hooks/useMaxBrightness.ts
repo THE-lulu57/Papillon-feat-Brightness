@@ -7,39 +7,57 @@ export function useMaxBrightness() {
 
   const previousBrightness = useRef<number | null>(null);
 
+export function useMaxBrightness() {
+  const previousBrightness = useRef<number | null>(null);
+  const isMounted = useRef(true);
+  const isRestoring = useRef(false); // 👈 Nouveau flag
+
   useEffect(() => {
+    isMounted.current = true;
+
     const enableBrightness = async () => {
+      if (!isMounted.current || isRestoring.current) return; // 👈 Check restoration
+      
       try {
+        const current = await Brightness.getBrightnessAsync();
+        if (!isMounted.current) return;
+        
         if (previousBrightness.current === null) {
-          previousBrightness.current = await getBrightnessAsync();
+          previousBrightness.current = current;
         }
-        await setBrightnessAsync(1);
+        await Brightness.setBrightnessAsync(1);
       } catch (error) {
-        warn("Failed to set brightness:");
+        warn("Failed to set brightness");
       }
     };
 
     const restoreBrightness = async () => {
+      if (!isMounted.current) return; // 👈 Check avant de restaurer
+      isRestoring.current = true; // 👈 Bloque enableBrightness
+      
       try {
         if (previousBrightness.current !== null) {
-          await setBrightnessAsync(previousBrightness.current);
+          await Brightness.setBrightnessAsync(previousBrightness.current);
         }
       } catch (error) {
-        warn("Failed to restore brightness:");
+        warn("Failed to restore brightness");
+      } finally {
+        isRestoring.current = false; // 👈 Libère
       }
     };
 
     enableBrightness();
 
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState === "inactive" || nextAppState === "background" ) {
+    const subscription = AppState.addEventListener("change", (nextState: AppStateStatus) => {
+      if (nextState === "background" || nextState === "inactive") {
         restoreBrightness();
-      } else if (nextAppState === "active") {
+      } else if (nextState === "active") {
         enableBrightness();
       }
     });
 
     return () => {
+      isMounted.current = false;
       restoreBrightness();
       subscription.remove();
     };
