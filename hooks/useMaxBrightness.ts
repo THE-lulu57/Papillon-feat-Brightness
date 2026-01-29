@@ -40,8 +40,8 @@ export function useMaxBrightness() {
     });
 
     return () => {
-      subscription.remove();
       restoreBrightness();
+      subscription.remove();
     };
   }, []);
 }
