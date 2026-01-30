@@ -4,59 +4,65 @@ import { setBrightnessAsync, getBrightnessAsync } from "expo-brightness";
 import { warn } from "@/utils/logger/logger";
 
 export function useMaxBrightness() {
-  const previousBrightness = useRef<number | null>(null);
-  const lastOperationId = useRef(0);
+  // On utilise une ref pour stocker la valeur INITIALE (celle de l'utilisateur)
+  // On ne la changera JAMAIS après le premier fetch réussi.
+  const originalBrightness = useRef<number | null>(null);
+  const isHookActive = useRef(true);
 
   useEffect(() => {
-    // Fonction centrale pour gérer les changements avec priorité au dernier appel
-    const updateBrightness = async (target: 'max' | 'restore') => {
-      const currentId = ++lastOperationId.current;
+    isHookActive.current = true;
 
+    const enableMax = async () => {
       try {
-        if (target === 'max') {
-          // 1. On récupère la luminosité actuelle si pas déjà fait
-          if (previousBrightness.current === null) {
-            const val = await getBrightnessAsync();
-            // Si une autre opération a commencé entre temps, on stop
-            if (currentId !== lastOperationId.current) return;
-            previousBrightness.current = val;
-          }
-          await setBrightnessAsync(1);
-        } else {
-          // 2. On restaure
-          if (previousBrightness.current !== null) {
-            await setBrightnessAsync(previousBrightness.current);
-            // On ne reset pas previousBrightness ici pour pouvoir 
-            // le réutiliser si on revient de l'arrière-plan
-          }
+        // ÉTAPE 1 : On récupère la valeur seulement si on ne l'a pas encore
+        if (originalBrightness.current === null) {
+          const val = await getBrightnessAsync();
+          // Sécurité : si entre temps on a quitté l'écran, on stop.
+          if (!isHookActive.current) return;
+          
+          // Si la valeur récupérée est déjà 1, c'est louche (peut-être un bug précédent)
+          // mais on fait confiance au premier fetch.
+          originalBrightness.current = val;
         }
-      } catch (error) {
-        warn(`Failed to ${target} brightness:`, error);
+
+        // ÉTAPE 2 : On monte le son... euh, la lumière
+        if (isHookActive.current) {
+          await setBrightnessAsync(1);
+        }
+      } catch (e) {
+        warn("Erreur enableMax", e);
       }
     };
 
-    // Initialisation
-    updateBrightness('max');
+    const restoreOriginal = async () => {
+      if (originalBrightness.current !== null) {
+        try {
+          await setBrightnessAsync(originalBrightness.current);
+        } catch (e) {
+          warn("Erreur restore", e);
+        }
+      }
+    };
 
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState.match(/inactive|background/)) {
-        updateBrightness('restore');
-      } else if (nextAppState === "active") {
-        updateBrightness('max');
+    // Lancement initial
+    enableMax();
+
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        // Quand on revient, on ne re-fetch pas la luminosité (pour ne pas choper le 100%)
+        // On se contente de remettre à 1 en utilisant la vieille sauvegarde
+        enableMax();
+      } else {
+        // "inactive" ou "background"
+        restoreOriginal();
       }
     });
 
     return () => {
-      // On incrémente pour annuler toute opération 'max' en cours
-      lastOperationId.current++; 
-      
-      // On lance la restauration finale
-      if (previousBrightness.current !== null) {
-        setBrightnessAsync(previousBrightness.current).catch(() => 
-          warn("Failed restore on unmount")
-        );
-      }
+      isHookActive.current = false;
       subscription.remove();
+      // On restore immédiatement au démontage
+      restoreOriginal();
     };
   }, []);
 }
