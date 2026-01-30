@@ -1,30 +1,19 @@
-import { AppState, AppStateStatus } from "react-native";
+import { AppState } from "react-native";
 import { useEffect, useRef } from "react";
 import { setBrightnessAsync, getBrightnessAsync } from "expo-brightness";
 import { warn } from "@/utils/logger/logger";
 
 export function useMaxBrightness() {
   const previousBrightness = useRef<number | null>(null);
+  const brightnessPromise = useRef<Promise<number> | null>(null);
 
   useEffect(() => {
-    let isMounted = true; // 1. On suit l'état du montage
-
     const enableBrightness = async () => {
       try {
-        // On récupère la valeur AVANT de changer quoi que ce soit
-        const currentBrightness = await getBrightnessAsync();
-
-        // 2. CHECK DE SÉCURITÉ :
-        // Si le composant a été démonté pendant le 'await' ci-dessus, on arrête tout.
-        // On n'écrase pas la ref et surtout ON NE CHANGE PAS la luminosité.
-        if (!isMounted) return;
-
-        // Si on n'a pas encore sauvegardé de valeur précédente, on le fait
-        if (previousBrightness.current === null) {
-          previousBrightness.current = currentBrightness;
+        if (previousBrightness.current === null && brightnessPromise.current === null) {
+          brightnessPromise.current = getBrightnessAsync();
+          previousBrightness.current = await brightnessPromise.current;
         }
-
-        // Maintenant on peut monter la luminosité
         await setBrightnessAsync(1);
       } catch (error) {
         warn("Failed to set brightness:");
@@ -33,10 +22,13 @@ export function useMaxBrightness() {
 
     const restoreBrightness = async () => {
       try {
+        // Attendre que la luminosité initiale soit récupérée si nécessaire
+        if (brightnessPromise.current !== null && previousBrightness.current === null) {
+          previousBrightness.current = await brightnessPromise.current;
+        }
+        
         if (previousBrightness.current !== null) {
           await setBrightnessAsync(previousBrightness.current);
-          // Optionnel : remettre à null pour éviter des restaurations multiples incorrectes
-          // previousBrightness.current = null; 
         }
       } catch (error) {
         warn("Failed to restore brightness:");
@@ -46,10 +38,7 @@ export function useMaxBrightness() {
     enableBrightness();
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
-      // Sécurité supplémentaire : on ne restaure que si on est toujours "monté"
-      if (!isMounted) return; 
-
-      if (nextAppState.match(/inactive|background/)) {
+      if (nextAppState === "inactive" || nextAppState === "background") {
         restoreBrightness();
       } else if (nextAppState === "active") {
         enableBrightness();
@@ -57,7 +46,6 @@ export function useMaxBrightness() {
     });
 
     return () => {
-      isMounted = false; // 3. On signale que le composant est démonté
       restoreBrightness();
       subscription.remove();
     };
