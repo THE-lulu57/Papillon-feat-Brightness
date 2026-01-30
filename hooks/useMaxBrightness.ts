@@ -5,16 +5,20 @@ import { warn } from "@/utils/logger/logger";
 
 export function useMaxBrightness() {
   const previousBrightness = useRef<number | null>(null);
-  const brightnessPromise = useRef<Promise<number> | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    let initialBrightnessPromise: Promise<number> | null = null;
+
     const enableBrightness = async () => {
       try {
-        if (previousBrightness.current === null && brightnessPromise.current === null) {
-          brightnessPromise.current = getBrightnessAsync();
-          previousBrightness.current = await brightnessPromise.current;
+        if (previousBrightness.current === null) {
+          initialBrightnessPromise = getBrightnessAsync();
+          previousBrightness.current = await initialBrightnessPromise;
         }
-        await setBrightnessAsync(1);
+        if (isMounted.current) {
+          await setBrightnessAsync(1);
+        }
       } catch (error) {
         warn("Failed to set brightness:");
       }
@@ -22,9 +26,9 @@ export function useMaxBrightness() {
 
     const restoreBrightness = async () => {
       try {
-        // Attendre que la luminosité initiale soit récupérée si nécessaire
-        if (brightnessPromise.current !== null && previousBrightness.current === null) {
-          previousBrightness.current = await brightnessPromise.current;
+        // Attendre que la brightness initiale soit récupérée
+        if (initialBrightnessPromise && previousBrightness.current === null) {
+          previousBrightness.current = await initialBrightnessPromise;
         }
         
         if (previousBrightness.current !== null) {
@@ -46,8 +50,10 @@ export function useMaxBrightness() {
     });
 
     return () => {
-      restoreBrightness();
+      isMounted.current = false;
       subscription.remove();
+      // Le cleanup doit attendre la restauration
+      restoreBrightness();
     };
   }, []);
 }
