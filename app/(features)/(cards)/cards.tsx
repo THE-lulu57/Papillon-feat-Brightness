@@ -19,7 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, Pressable, View } from "react-native";
+import { Image, ImageBackground, Pressable, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function QRCodeAndCardsPage() {
@@ -167,74 +167,68 @@ export function Card({
       }}
       disabled={disabled}
     >
-      <Image
+      <ImageBackground
         source={getServiceBackground(service)}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          right: 0,
-          left: 0,
-          width: "100%",
-          height: '100%',
-        }}
+        style={{ flex: 1 }}
         resizeMode="cover"
-      />
-      <LinearGradient
-        colors={["#00000080", "transparent"]}
-        locations={[0, 0.87]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      />
+      >
+        <LinearGradient
+          colors={["#00000080", "transparent"]}
+          locations={[0, 0.87]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
 
-      {pressed && (
-        <View style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.2)",
-        }} />
-      )}
+        {pressed && (
+          <View style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+          }} />
+        )}
 
-      <View style={{ padding: 15, flex: 1 }}>
-        <Stack
-          direction="horizontal"
-          style={{ justifyContent: "space-between" }}
-          hAlign="center"
-        >
-          <Stack direction="horizontal" hAlign="center" gap={8}>
-            <Image
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "#0000001F",
-              }}
-              source={getServiceLogo(service)}
-              resizeMode="cover"
-            />
-            <Typography variant="title" color={"#FFFFFF"}>{getServiceName(service)}</Typography>
+        <View style={{ padding: 15, flex: 1 }}>
+          <Stack
+            direction="horizontal"
+            style={{ justifyContent: "space-between" }}
+            hAlign="center"
+          >
+            <Stack direction="horizontal" hAlign="center" gap={8}>
+              <Image
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: "#0000001F",
+                }}
+                source={getServiceLogo(service)}
+                resizeMode="cover"
+              />
+              <Typography variant="title" color={"#FFFFFF"}>{getServiceName(service)}</Typography>
+            </Stack>
+
+            <Stack gap={0} direction="vertical">
+              <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
+                {wallet.label}
+              </Typography>
+              <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
+                {(wallet.amount / 100).toFixed(2)} {wallet.currency}
+              </Typography>
+            </Stack>
           </Stack>
-
-          <Stack gap={0} direction="vertical">
-            <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
-              {wallet.label}
-            </Typography>
-            <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
-              {(wallet.amount / 100).toFixed(2)} {wallet.currency}
-            </Typography>
-          </Stack>
-        </Stack>
-      </View>
+        </View>
+      </ImageBackground>
     </Pressable>
   )
 }
