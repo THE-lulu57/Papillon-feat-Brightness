@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const OnboardingBackButton = (props: {
   icon?: string;
   position?: 'left' | 'right';
+  iconColor?: string;
 }) => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -16,17 +17,17 @@ const OnboardingBackButton = (props: {
       onPress={() => router.back()}
       style={[
         {
-        position: 'absolute',
-        top: insets.top + 4,
-        zIndex: 200,
-        backgroundColor: '#ffffff42',
-        padding: 10,
-        borderRadius: 100,
+          position: 'absolute',
+          top: insets.top + 4,
+          zIndex: 200,
+          backgroundColor: '#ffffff42',
+          padding: 10,
+          borderRadius: 100,
         },
         props.position === 'right' ? { right: 16 } : { left: 16 }
       ]}
     >
-      <Papicons name={props.icon ?? "ArrowLeft"} size={26} fill={"#fff"}/>
+      <Papicons name={props.icon ?? "ArrowLeft"} size={26} fill={props.iconColor ?? "#fff"} />
     </AnimatedPressable>
   )
 }
