@@ -8,9 +8,24 @@ import { getDatabaseInstance } from "./DatabaseProvider";
 import { mapBalancesToShared } from "./mappers/balances";
 import { Balance } from "./models/Balance";
 import { safeWrite } from "./utils/safeTransaction";
+import Papicard from "./models/Papicard";
 
 export async function removeBalanceFromDatabase(serviceId: string) {
   const db = getDatabaseInstance();
+  
+  if (serviceId.startsWith("papicard_")) {
+  const cardId = serviceId.replace("papicard_", "");
+  try {
+    const card = await db.get<Papicard>("papicard").find(cardId);
+    await safeWrite(db, async () => {
+      await card.destroyPermanently();
+    });
+  } catch (e) {
+    warn(`Papicard introuvable ou déjà supprimée : ${String(e)}`);
+  }
+  return;
+}
+
   const dbBalances = await db.get<Balance>('balances')
     .query(
       Q.where('createdByAccount', serviceId)
