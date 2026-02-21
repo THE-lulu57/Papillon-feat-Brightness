@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Pressable, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { getPapicardsAsBalances } from "@/database/usePapicard";
 
 export default function QRCodeAndCardsPage() {
   const [wallets, setWallets] = useState<Balance[]>([]);
@@ -30,12 +31,12 @@ export default function QRCodeAndCardsPage() {
   const account = accounts.find((a) => a.id === lastUsedAccount);
 
   async function fetchWallets() {
-    const manager = getManager()
-    const balances = await manager.getCanteenBalances()
-    const result: Balance[] = []
-    for (const balance of balances) {
-      result.push(balance)
-    }
+    const manager = getManager();
+
+    const onlineBalances = await manager.getCanteenBalances();
+    const manualBalances = await getPapicardsAsBalances();
+    const result = [...onlineBalances, ...manualBalances];
+
     setWallets(result);
   }
 
@@ -75,6 +76,8 @@ export default function QRCodeAndCardsPage() {
         contentInsetAdjustmentBehavior="automatic" style={{ flex: 1, paddingTop: headerHeight - 16 }} contentContainerStyle={{ padding: 20, gap: 16 }}
       >
         {wallets.map((c, i) => {
+          const serviceId = c.serviceId ?? account?.services.find(service => service.id === c.createdByAccount)?.serviceId ?? Services.TURBOSELF;
+
           return (
             <Dynamic
               animated
@@ -86,7 +89,7 @@ export default function QRCodeAndCardsPage() {
                 key={c.createdByAccount + c.label}
                 index={i}
                 wallet={c}
-                service={account?.services.find(service => service.id === c.createdByAccount)?.serviceId ?? Services.TURBOSELF}
+                service={serviceId}
                 totalCards={wallets.length}
               />
             </Dynamic>
@@ -142,14 +145,37 @@ export function Card({
 }) {
   const [pressed, setPressed] = useState(false);
 
+  // For Papicard Service
+  const walletData = wallet as any;
+  const papicardColor = walletData.color;
+  const qrData = walletData.qrData || '';
+  const qrType = walletData.qrType || 'QR';
+  const customLabel = wallet.label;
+  const displayName = getServiceName(service, service === Services.PAPICARD ? customLabel : undefined);
+
   return (
     <Pressable
       onPress={() => {
         if (!disabled) {
-          router.push({
-            pathname: "/(features)/(cards)/specific",
-            params: { serviceName: getServiceName(service), service: service, wallet: JSON.stringify(wallet) }
-          });
+          if (service === Services.PAPICARD) {
+            router.push({
+              pathname: "/(features)/(cards)/qrcode",
+              params: {
+                qrcode: qrData,
+                type: qrType,
+                service: service.toString()
+              }
+            });
+          } else {
+            router.push({
+              pathname: "/(features)/(cards)/specific",
+              params: {
+                serviceName: getServiceName(service),
+                service: service,
+                wallet: JSON.stringify(wallet)
+              }
+            });
+          }
         }
       }}
       onPressIn={() => setPressed(true)}
@@ -168,7 +194,7 @@ export function Card({
       disabled={disabled}
     >
       <Image
-        source={getServiceBackground(service)}
+        source={getServiceBackground(service, service === Services.PAPICARD ? papicardColor : undefined)}
         style={{
           position: "absolute",
           bottom: 0,
@@ -222,7 +248,7 @@ export function Card({
               source={getServiceLogo(service)}
               resizeMode="cover"
             />
-            <Typography variant="title" color={"#FFFFFF"}>{getServiceName(service)}</Typography>
+            <Typography variant="title" color={"#FFFFFF"}>{displayName}</Typography>
           </Stack>
 
           <Stack gap={0} direction="vertical">
