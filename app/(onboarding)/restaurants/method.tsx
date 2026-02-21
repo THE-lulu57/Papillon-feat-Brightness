@@ -3,6 +3,7 @@ import { RelativePathString, router, useFocusEffect, useLocalSearchParams } from
 import LottieView from "lottie-react-native";
 import React from "react";
 import { Image } from "react-native";
+import Icon from '@/ui/components/Icon';
 import Reanimated, { FadeInDown } from "react-native-reanimated";
 
 import AnimatedPressable from "@/ui/components/AnimatedPressable";
@@ -68,12 +69,18 @@ export default function WelcomeScreen() {
               }
             ]}
           >
-            <Image
-              borderRadius={500}
-              source={item.image}
-              style={{ width: 32, height: 32 }}
-              resizeMode="cover"
-            />
+            {item.image ? (
+              <Image
+                borderRadius={500}
+                source={item.image}
+                style={{ width: 32, height: 32 }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Icon papicon>
+                {item.icon}
+              </Icon>
+            )}
             <Typography
               style={{ flex: 1 }}
               nowrap
