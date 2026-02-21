@@ -11,6 +11,7 @@ import Ical from '@/database/models/Ical';
 import News from '@/database/models/News';
 import Subject from '@/database/models/Subject';
 import Course from '@/database/models/Timetable';
+import Papicard from '@/database/models/Papicard';
 
 import { Balance } from './models/Balance';
 import CanteenHistoryItem from './models/CanteenHistory';
@@ -44,6 +45,7 @@ export const database = new Database({
     Course,
     Kid,
     Balance,
-    CanteenHistoryItem
+    CanteenHistoryItem,
+    Papicard
   ],
 });
