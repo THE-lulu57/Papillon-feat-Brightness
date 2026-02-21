@@ -3,6 +3,7 @@ import { Papicons } from "@getpapillon/papicons";
 import { useTheme } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Alert, Image, ScrollView, View } from "react-native";
+import { useEffect, useState } from "react";
 
 import { useAccountStore } from "@/stores/account";
 import { Services } from "@/stores/account/types";
@@ -19,6 +20,9 @@ import { removeBalanceFromDatabase } from "@/database/useBalance";
 import { getManager } from "@/services/shared";
 import i18n from "@/utils/i18n";
 
+import { getPapicardsAsBalances } from "@/database/usePapicard";
+import { Balance } from "@/services/shared/balance";
+
 export default function CardView() {
   const router = useRouter();
   const accounts = useAccountStore((state) => state.accounts);
@@ -29,13 +33,19 @@ export default function CardView() {
       if (service.serviceId === Services.ECOLEDIRECTE) {
         return isSelfModuleEnabledED(service.additionals);
       }
-      return [Services.TURBOSELF, Services.ARD, Services.IZLY].includes(service.serviceId);
+      return [Services.TURBOSELF, Services.ARD, Services.IZLY, Services.PAPICARD].includes(service.serviceId);
     },
   );
 
   const theme = useTheme();
   const { colors } = theme;
   const { t } = useTranslation();
+
+  const [manualBalances, setManualBalances] = useState<Balance[]>([]);
+
+  useEffect(() => {
+    getPapicardsAsBalances().then(setManualBalances);
+  }, []);
 
   return (
     <ScrollView
@@ -64,6 +74,10 @@ export default function CardView() {
             <ScrollView scrollEnabled={false}>
               <List>
                 {selfCompatible?.map(service => {
+                  const manualInfo = manualBalances.find(m => m.createdByAccount === service.id);
+                  const customLabel = manualInfo?.label;
+                  const papicardColor = (manualInfo as any)?.color;
+
                   return (
                     <Item
                       key={service.id}
@@ -72,7 +86,7 @@ export default function CardView() {
                           Alert.alert("Tu ne peux pas supprimer cette carte", "Cette carte est liée à ton service scolaire.");
                           return;
                         }
-                        Alert.alert(getServiceName(service.serviceId), "Que souhaitez-vous faire ?", [
+                        Alert.alert(getServiceName(service.serviceId, service.serviceId === Services.PAPICARD ? customLabel : undefined), "Que souhaitez-vous faire ?", [
                           {
                             text: "Supprimer",
                             style: "destructive",
@@ -93,7 +107,7 @@ export default function CardView() {
                       }}
                     >
                       <Leading>
-                        <Image source={getServiceBackground(service.serviceId)}
+                        <Image source={getServiceBackground(service.serviceId, service.serviceId === Services.PAPICARD ? papicardColor : undefined)}
                           style={{
                             width: 60,
                             height: 40,
@@ -107,7 +121,7 @@ export default function CardView() {
                           opacity={0.5}
                         />
                       </Trailing>
-                      <Typography>{getServiceName(service.serviceId)}</Typography>
+                      <Typography>{getServiceName(service.serviceId, service.serviceId === Services.PAPICARD ? customLabel : undefined)}</Typography>
                       <Typography style={{ opacity: 0.5 }}>Ajoutée
                         le {new Date(service.createdAt).toLocaleDateString(i18n.language, {
                           day: "2-digit",
