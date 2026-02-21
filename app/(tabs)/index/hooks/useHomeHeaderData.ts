@@ -22,6 +22,7 @@ export const useHomeHeaderData = () => {
           Services.ARD,
           Services.ECOLEDIRECTE,
           Services.IZLY,
+          Services.PAPICARD,
         ].includes(service.serviceId)
       ) ?? [],
     [account]
