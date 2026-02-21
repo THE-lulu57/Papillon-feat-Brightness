@@ -51,6 +51,12 @@
   "INPUT_PIN": "Code PIN",
   "SEARCH_UNIV_PLACEHOLDER": "Rechercher une instance...",
   "ONBOARDING_LOADING_LOGIN": "Connexion en cours...",
+  "ONBOARDING_PAPICARD_BTN": "C'est Parti",
+  "ONBOARDING_PAPICARD": "Crée ta Papicard en scannant un QR-Code ou un code-barres",
+  "ONBOARDING_PAPICARD_SCAN_TITLE": "Scanner une carte",
+  "ONBOARDING_PAPICARD_SCAN_SUBTITLE": "Scanne un QR code ou un code-barres pour créer ta Papicard",
+  "PAPICARD_SERVICE_NAME":"Autres services",
+  "PAPICARD_NAME_INPUT": "Nom de la carte",
 
   "WAITING": "En attente",
   "IZLY_SMS_SEND": "Tu viens de recevoir un lien pour te connecter, clique dessus et suis les étapes.",
@@ -453,3 +459,4 @@
   "Yesterday": "Hier",
   "Tomorrow": "Demain"
 }
+
