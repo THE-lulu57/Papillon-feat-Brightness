@@ -120,6 +120,19 @@ export default function OnboardingLayout() {
                     initialParams={{ action: "addAccount" }}
                 />
                 <Stack.Screen
+                    name="papicard/credentials"
+                    options={{ ...newScreenOptions }}
+                    initialParams={{ action: "addAccount" }}
+                />
+                <Stack.Screen
+                    name="papicard/scan"
+                    options={{ ...newScreenOptions }}
+                />
+                <Stack.Screen
+                    name="papicard/modify-card"
+                    options={{ ...newScreenOptions }}
+                />
+                <Stack.Screen
                     name="skolengo/webview"
                     options={{ ...newScreenOptions }}
                     initialParams={{ ref: {} }}
