@@ -251,12 +251,14 @@ export interface SupportedRestaurant {
   name: string;
   title: string;
   hasLimitedSupport: boolean;
-  image: any;
+  image?: any;
+  icon?: React.ReactNode;
   type: string;
   onPress: () => void;
 }
 
 export function GetSupportedRestaurants(redirect: (path: { pathname: string }) => void): SupportedRestaurant[] {
+  const { t } = useTranslation();
   return [
     {
       name: "turboself",
@@ -296,6 +298,16 @@ export function GetSupportedRestaurants(redirect: (path: { pathname: string }) =
       type: "main",
       onPress: () => {
         redirect({ pathname: '../alise/credentials' });
+      }
+    },
+    {
+      name: "papicard",
+      title: t("PAPICARD_SERVICE_NAME"),
+      hasLimitedSupport: false,
+      icon: <Papicons name={"QrCode"} />,
+      type: "main",
+      onPress: () => {
+        redirect({ pathname: '../papicard/credentials' });
       }
     }
   ]
