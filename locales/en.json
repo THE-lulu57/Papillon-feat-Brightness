@@ -46,6 +46,12 @@
   "ONBOARDING_COLOR_SECOND_LINE_DESCRIPTION": "theme color",
   "ONBOARDING_LOGIN_PINCODE": "Enter your PRONOTE PIN code",
   "Onboarding_Load_Webview_Description": "We are loading your school’s website",
+  "ONBOARDING_PAPICARD_BTN": "Let's go",
+  "ONBOARDING_PAPICARD": "Create your Papicard by scanning a QR code or barcode",
+  "ONBOARDING_PAPICARD_SCAN_TITLE": "Scan a card",
+  "ONBOARDING_PAPICARD_SCAN_SUBTITLE": "Scan a QR code or barcode to create your Papicard",
+  "PAPICARD_NAME_INPUT": "Card name",
+  "PAPICARD_SERVICE_NAME":"Other services",
   "INPUT_PIN": "PIN code",
   "SEARCH_UNIV_PLACEHOLDER": "Search an instance...",
   "ONBOARDING_LOADING_LOGIN": "Logging in...",
@@ -378,3 +384,4 @@
   "Yesterday": "Yesterday",
   "Tomorrow": "Tomorrow"
 }
+
