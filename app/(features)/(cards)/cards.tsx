@@ -251,14 +251,16 @@ export function Card({
             <Typography variant="title" color={"#FFFFFF"}>{displayName}</Typography>
           </Stack>
 
-          <Stack gap={0} direction="vertical">
-            <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
-              {wallet.label}
-            </Typography>
-            <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
-              {(wallet.amount / 100).toFixed(2)} {wallet.currency}
-            </Typography>
-          </Stack>
+          {service !== Services.PAPICARD && (
+            <Stack gap={0} direction="vertical">
+              <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
+                {wallet.label}
+              </Typography>
+              <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
+                {(wallet.amount / 100).toFixed(2)} {wallet.currency}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
       </View>
     </Pressable>
