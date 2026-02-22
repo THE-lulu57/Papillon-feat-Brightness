@@ -113,8 +113,7 @@ export default function QRCodeAndCardsPage() {
 
         <Dynamic animated>
           <Button
-            inline
-            title="Ajouter"
+            title={t("Context_Add")}
             icon={<Plus />}
             onPress={() => {
               router.dismiss();
