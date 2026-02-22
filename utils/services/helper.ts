@@ -2,7 +2,7 @@ import { ImageSourcePropType } from "react-native";
 
 import { Services } from "@/stores/account/types";
 
-export function getServiceName(service: Services, customLabel?: string): string {
+export function getServiceName(service: Services): string {
   switch(service) {
   case Services.TURBOSELF:
     return "TurboSelf";
@@ -12,8 +12,6 @@ export function getServiceName(service: Services, customLabel?: string): string 
     return "Izly";
   case Services.ALISE:
     return "Alise";
-  case Services.PAPICARD:
-      return customLabel || "Papicard";
   case Services.ECOLEDIRECTE:
     return "ÉcoleDirecte";
   case Services.LANNION:
@@ -41,14 +39,12 @@ export function getServiceLogo(service: Services): ImageSourcePropType {
     return require("@/assets/images/ecoledirecte.png")
   case Services.ALISE:
     return require("@/assets/images/alise.jpg")
-  case Services.PAPICARD:
-      return require("@/assets/app.icon/Assets/glass 2.png")
   default: 
     return require("@/assets/images/turboself.png")
   }
 }
 
-export function getServiceBackground(service: Services, color?: string): ImageSourcePropType {
+export function getServiceBackground(service: Services): ImageSourcePropType {
   switch(service) {
   case Services.TURBOSELF:
     return require("@/assets/images/turboself_background_card.png")
@@ -60,32 +56,9 @@ export function getServiceBackground(service: Services, color?: string): ImageSo
     return require("@/assets/images/card_background/ecoledirecte.png")
   case Services.ALISE:
     return require("@/assets/images/alise_background_card.png")
-  case Services.PAPICARD:
-      return getPapicardImageByColor(color);
   default: 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("@/assets/images/ard_background_card.png")
-  }
-}
-
-function getPapicardImageByColor(color?: string): ImageSourcePropType {
-  const colorUpper = color?.toUpperCase();
-  
-  switch(colorUpper) {
-    case '#26B290':
-      return require("@/assets/images/card_background/papicard_green.png");
-    case '#48B7E8':
-      return require("@/assets/images/card_background/papicard_blue.png");
-    case '#6D6D6D':
-      return require("@/assets/images/card_background/papicard_black.png");
-    case '#E8B048':
-      return require("@/assets/images/card_background/papicard_yellow.png");
-    case '#C400DD':
-      return require("@/assets/images/card_background/papicard_purple.png");
-    case '#DD007D':
-      return require("@/assets/images/card_background/papicard_pink.png");
-    default:
-      return require("@/assets/images/card_background/papicard_green.png");
   }
 }
 
