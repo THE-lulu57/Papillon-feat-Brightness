@@ -85,6 +85,10 @@ export class AccountManager {
     let refreshedAtLeastOne = false;
 
     for (const service of this.account.services) {
+      if (service.serviceId === Services.PAPICARD) {
+        log("Skipping Papicard refresh (local only, no plugin needed)");
+        continue;
+      }
       try {
         log("Trying to refresh " + service.id);
         const plugin = this.getServicePluginForAccount(service);
@@ -587,6 +591,10 @@ export class AccountManager {
   private getServicePluginForAccount(
     service: ServiceAccount
   ): SchoolServicePlugin {
+    if (service.serviceId === Services.PAPICARD) {
+      log("Papicard service detected - no plugin needed (local storage only)");
+      return null;
+    }
     if (service.serviceId === Services.PRONOTE) {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const module = require("@/services/pronote/index");
