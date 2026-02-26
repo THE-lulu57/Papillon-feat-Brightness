@@ -3,7 +3,6 @@ import { Papicons } from "@getpapillon/papicons";
 import { useTheme } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Alert, Image, ScrollView, View } from "react-native";
-import { useEffect, useState } from "react";
 
 import { useAccountStore } from "@/stores/account";
 import { Services } from "@/stores/account/types";
@@ -19,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { removeBalanceFromDatabase } from "@/database/useBalance";
 import { getManager } from "@/services/shared";
 import i18n from "@/utils/i18n";
-
+import { useEffect, useState } from "react";
 import { getPapicardsAsBalances } from "@/database/usePapicard";
 import { Balance } from "@/services/shared/balance";
 
@@ -33,7 +32,7 @@ export default function CardView() {
       if (service.serviceId === Services.ECOLEDIRECTE) {
         return isSelfModuleEnabledED(service.additionals);
       }
-      return [Services.TURBOSELF, Services.ARD, Services.IZLY, Services.PAPICARD].includes(service.serviceId);
+      return [Services.TURBOSELF, Services.ARD, Services.IZLY].includes(service.serviceId);
     },
   );
 
@@ -41,10 +40,13 @@ export default function CardView() {
   const { colors } = theme;
   const { t } = useTranslation();
 
-  const [manualBalances, setManualBalances] = useState<Balance[]>([]);
+  const [papicards, setPapicards] = useState<(Balance & { qrData: string; qrType: string; color: string })[]>([]);
+  const hasCards = (selfCompatible ?? []).length > 0 || papicards.length > 0;
 
   useEffect(() => {
-    getPapicardsAsBalances().then(setManualBalances);
+    getPapicardsAsBalances().then((cards) => {
+      setPapicards(cards as any);
+    });
   }, []);
 
   return (
@@ -60,7 +62,7 @@ export default function CardView() {
         iconName="Card"
         imageSource={require("@/assets/images/cards.png")}
       />
-      {(selfCompatible ?? []).length > 0 ? (
+      {hasCards ? (
         <>
           <Typography style={{ opacity: 0.5 }}>Mes cartes</Typography>
           <View style={{
@@ -73,63 +75,92 @@ export default function CardView() {
           >
             <ScrollView scrollEnabled={false}>
               <List>
-                {selfCompatible?.map(service => {
-                  const manualInfo = manualBalances.find(m => m.createdByAccount === service.id);
-                  const customLabel = manualInfo?.label;
-                  const papicardColor = (manualInfo as any)?.color;
-
-                  return (
-                    <Item
-                      key={service.id}
-                      onPress={() => {
-                        if (service.serviceId === Services.ECOLEDIRECTE) {
-                          Alert.alert("Tu ne peux pas supprimer cette carte", "Cette carte est liée à ton service scolaire.");
-                          return;
-                        }
-                        Alert.alert(getServiceName(service.serviceId, service.serviceId === Services.PAPICARD ? customLabel : undefined), "Que souhaitez-vous faire ?", [
-                          {
-                            text: "Supprimer",
-                            style: "destructive",
-                            onPress: () => {
-                              useAccountStore.getState().removeServiceFromAccount(service.id);
-                              removeBalanceFromDatabase(service.id)
-                              const manager = getManager()
-                              if (manager) {
-                                manager.removeService(service.id)
-                              }
-                            },
+                {selfCompatible?.map(service => (
+                  <Item
+                    key={service.id}
+                    onPress={() => {
+                      if (service.serviceId === Services.ECOLEDIRECTE) {
+                        Alert.alert("Tu ne peux pas supprimer cette carte", "Cette carte est liée à ton service scolaire.");
+                        return;
+                      }
+                      Alert.alert(getServiceName(service.serviceId), "Que souhaitez-vous faire ?", [
+                        {
+                          text: "Supprimer",
+                          style: "destructive",
+                          onPress: () => {
+                            useAccountStore.getState().removeServiceFromAccount(service.id);
+                            removeBalanceFromDatabase(service.id)
+                            const manager = getManager()
+                            if (manager) {
+                              manager.removeService(service.id)
+                            }
                           },
-                          {
-                            text: "Annuler",
-                            style: "cancel",
+                        },
+                        {
+                          text: "Annuler",
+                          style: "cancel",
+                        },
+                      ]);
+                    }}
+                  >
+                    <Leading>
+                      <Image source={getServiceBackground(service.serviceId)}
+                        style={{
+                          width: 60,
+                          height: 40,
+                          borderRadius: 4,
+                        }}
+                      />
+                    </Leading>
+                    <Trailing>
+                      <Papicons name={"ChevronRight"}
+                        fill={colors.text}
+                        opacity={0.5}
+                      />
+                    </Trailing>
+                    <Typography>{getServiceName(service.serviceId)}</Typography>
+                    <Typography style={{ opacity: 0.5 }}>Ajoutée
+                      le {new Date(service.createdAt).toLocaleDateString(i18n.language, {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}</Typography>
+                  </Item>
+                ))}
+                {papicards?.map(card => (
+                  <Item
+                    key={card.createdByAccount}
+                    onPress={() => {
+                      Alert.alert(card.label, "Que souhaitez-vous faire ?", [
+                        {
+                          text: "Supprimer",
+                          style: "destructive",
+                          onPress: async () => {
+                            await removeBalanceFromDatabase(card.createdByAccount);
+                            setPapicards(prev => prev.filter(c => c.createdByAccount !== card.createdByAccount));
                           },
-                        ]);
-                      }}
-                    >
-                      <Leading>
-                        <Image source={getServiceBackground(service.serviceId, service.serviceId === Services.PAPICARD ? papicardColor : undefined)}
-                          style={{
-                            width: 60,
-                            height: 40,
-                            borderRadius: 4,
-                          }}
-                        />
-                      </Leading>
-                      <Trailing>
-                        <Papicons name={"ChevronRight"}
-                          fill={colors.text}
-                          opacity={0.5}
-                        />
-                      </Trailing>
-                      <Typography>{getServiceName(service.serviceId, service.serviceId === Services.PAPICARD ? customLabel : undefined)}</Typography>
-                      <Typography style={{ opacity: 0.5 }}>Ajoutée
-                        le {new Date(service.createdAt).toLocaleDateString(i18n.language, {
-                          day: "2-digit",
-                          month: "2-digit",
-                        })}</Typography>
-                    </Item>
-                  );
-                })}
+                        },
+                        { text: "Annuler", style: "cancel" },
+                      ]);
+                    }}
+                  >
+                    <Leading>
+                      <Image source={getServiceBackground(Services.PAPICARD, card.color)}
+                        style={{
+                          width: 60,
+                          height: 40,
+                          borderRadius: 4,
+                        }}
+                      />
+                    </Leading>
+                    <Trailing>
+                      <Papicons name={"ChevronRight"}
+                        fill={colors.text}
+                        opacity={0.5}
+                      />
+                    </Trailing>
+                    <Typography>{getServiceName(Services.PAPICARD, card.label)}</Typography>
+                  </Item>
+                ))}
               </List>
               <Button color="blue"
                 title="Ajouter"
