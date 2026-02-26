@@ -14,8 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { useAlert } from '@/ui/components/AlertProvider';
 import { useTheme } from "@react-navigation/native";
 
-const { width } = Dimensions.get('window');
-
 const CARD_IMAGES: { [key: string]: any } = {
     '#26B290': require('@/assets/images/card_background/papicard_green.png'),
     '#48B7E8': require('@/assets/images/card_background/papicard_blue.png'),
@@ -80,9 +78,10 @@ export default function PreviewPapicardPage() {
                     <Image
                         source={CARD_IMAGES[selectedColor] || CARD_IMAGES['#26B290']}
                         style={{
-                            width: width - 48,
-                            height: 260,
+                            width: "100%",
+                            height: 250,
                             borderRadius: 20,
+                            overflow: "hidden",
                         }}
                         resizeMode="cover"
                     />
