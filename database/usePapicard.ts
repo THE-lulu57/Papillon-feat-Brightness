@@ -37,15 +37,6 @@ export async function addPapicard(
     10000,
     "add_papicard"
   );
-
-  store.addServiceToAccount(store.lastUsedAccount, {
-    serviceId: Services.PAPICARD,
-    id: `papicard_${cardId!}`,
-    createdAt: new Date(),
-    additionals: {
-      papicardId: cardId!,
-    },
-  });
 }
 
 
@@ -73,4 +64,12 @@ export async function getPapicardsAsBalances(): Promise<Balance[]> {
     warn(`Erreur lors de la récupération des Papicards: ${String(error)}`);
     return [];
   }
+}
+
+export function observePapicardsCount(callback: (count: number) => void) {
+  const db = getDatabaseInstance();
+  const subscription = db.get<Papicard>("papicard").query().observe().subscribe((cards) => {
+    callback(cards.length);
+  });
+  return () => subscription.unsubscribe();
 }
