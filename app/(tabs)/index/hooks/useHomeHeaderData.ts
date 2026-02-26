@@ -7,6 +7,7 @@ import { Period } from '@/services/shared/grade';
 import { getCurrentPeriod } from '@/utils/grades/helper/period';
 import { useAccountStore } from '@/stores/account';
 import { Services } from '@/stores/account/types';
+import { getPapicardsAsBalances, observePapicardsCount } from '@/database/usePapicard';
 
 export const useHomeHeaderData = () => {
   const accounts = useAccountStore((state) => state.accounts);
@@ -22,11 +23,17 @@ export const useHomeHeaderData = () => {
           Services.ARD,
           Services.ECOLEDIRECTE,
           Services.IZLY,
-          Services.PAPICARD,
         ].includes(service.serviceId)
       ) ?? [],
     [account]
   );
+
+  const [availablePapicards, setAvailablePapicards] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = observePapicardsCount((count) => setAvailablePapicards(count));
+    return () => unsubscribe();
+  }, []);
 
   const attendancesPeriodsRef = useRef<Period[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
@@ -75,6 +82,7 @@ export const useHomeHeaderData = () => {
   }, []);
 
   return {
+    availablePapicards,
     availableCanteenCards,
     attendancesPeriods: attendancesPeriodsRef.current,
     attendances,
