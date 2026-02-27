@@ -57,6 +57,7 @@ export default function QRCodePage() {
       scale.value = withSpring(1, { damping: 150, stiffness: 1500 });
     });
 
+  const isQRCode = type === "QR" || type === "QR_CODE";
 
   return (
     <GestureDetector
@@ -92,7 +93,7 @@ export default function QRCodePage() {
             }}
             entering={FlipInEasyX.springify().delay(100)}
           >
-            {type === "QR" ? (
+            {isQRCode ? (
               <QRCode
                 value={qr}
                 size={Dimensions.get("window").width * 0.8}
