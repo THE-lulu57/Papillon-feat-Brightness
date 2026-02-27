@@ -113,8 +113,7 @@ export default function QRCodeAndCardsPage() {
 
         <Dynamic animated>
           <Button
-            inline
-            title="Ajouter"
+            title={t("Context_Add")}
             icon={<Plus />}
             onPress={() => {
               router.dismiss();
@@ -201,7 +200,7 @@ export function Card({
           right: 0,
           left: 0,
           width: "100%",
-          height: '100%',
+          height: 250,
         }}
         resizeMode="cover"
       />
@@ -251,14 +250,16 @@ export function Card({
             <Typography variant="title" color={"#FFFFFF"}>{displayName}</Typography>
           </Stack>
 
-          <Stack gap={0} direction="vertical">
-            <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
-              {wallet.label}
-            </Typography>
-            <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
-              {(wallet.amount / 100).toFixed(2)} {wallet.currency}
-            </Typography>
-          </Stack>
+          {service !== Services.PAPICARD && (
+            <Stack gap={0} direction="vertical">
+              <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
+                {wallet.label}
+              </Typography>
+              <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
+                {(wallet.amount / 100).toFixed(2)} {wallet.currency}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
       </View>
     </Pressable>
