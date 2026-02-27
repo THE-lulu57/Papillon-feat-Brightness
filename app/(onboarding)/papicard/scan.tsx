@@ -19,6 +19,19 @@ export default function ScanPapicardPage() {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
 
+    const BARCODE_TYPE_MAP: Record<string, string> = {
+        "qr": "QR",
+        "ean13": "EAN13",
+        "ean8": "EAN8",
+        "code128": "CODE128",
+        "code39": "CODE39",
+        "code93": "CODE93",
+    };
+
+    const normalizeType = (raw: string): string => {
+        return BARCODE_TYPE_MAP[raw.toLowerCase()] ?? raw.toUpperCase();
+    };
+
     useEffect(() => {
         if (!permission?.granted) {
             requestPermission();
@@ -35,13 +48,13 @@ export default function ScanPapicardPage() {
         setScanned(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-        const codeType = type.includes("qr") || type.includes("QR") ? "QR" : "BARCODE";
+        const normalizedType = normalizeType(type);
 
         router.push({
             pathname: "../papicard/modify-card",
             params: {
                 data: data,
-                type: codeType,
+                type: normalizedType,
             }
         });
     };
@@ -93,11 +106,6 @@ export default function ScanPapicardPage() {
                                 "code128",
                                 "code39",
                                 "code93",
-                                "upc_a",
-                                "upc_e",
-                                "pdf417",
-                                "aztec",
-                                "datamatrix"
                             ]
                         }}
                         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
