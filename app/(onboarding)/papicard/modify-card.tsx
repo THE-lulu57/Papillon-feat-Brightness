@@ -70,18 +70,26 @@ export default function PreviewPapicardPage() {
                 contentContainerStyle={{ padding: 24, gap: 20 }}
                 keyboardShouldPersistTaps="handled"
             >
-                <View style={{
-                    alignItems: "center",
-                    marginTop: 65,
-                    marginBottom: 5,
-                }}>
+                <View
+                    style={{
+                        width: "100%",
+                        height: 210,
+                        borderRadius: 20,
+                        overflow: "hidden",
+                        marginTop: insets.top + 40,
+                        marginBottom: 5,
+                        alignItems: "center",
+                    }}
+                >
                     <Image
                         source={CARD_IMAGES[selectedColor] || CARD_IMAGES['#26B290']}
                         style={{
+                            position: "absolute",
+                            bottom: 0,
+                            right: 0,
+                            left: 0,
                             width: "100%",
-                            height: 250,
-                            borderRadius: 20,
-                            overflow: "hidden",
+                            height: "100%",
                         }}
                         resizeMode="cover"
                     />
