@@ -24,7 +24,7 @@ jobs:
         run: npm install --legacy-peer-deps || true
         
       - name: Bun prebuild
-        run: bun prebuild
+        run: npm prebuild
 
       - name: Install CocoaPods
         run: |
