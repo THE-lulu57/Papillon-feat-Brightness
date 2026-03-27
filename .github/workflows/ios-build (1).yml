@@ -21,10 +21,10 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
       - name: Install JS dependencies
-        run: npm install --legacy-peer-deps || true
+        run: bun install
         
       - name: Bun prebuild
-        run: npm prebuild
+        run: bunx expo prebuild -- platform ios -- clean
 
       - name: Install CocoaPods
         run: |
