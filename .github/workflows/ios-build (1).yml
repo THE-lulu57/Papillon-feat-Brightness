@@ -23,8 +23,8 @@ jobs:
       - name: Install JS dependencies
         run: npm install --legacy-peer-deps || true
         
-      - name: Expo prebuild iOS
-        run: npx expo prebuild --platform ios --clean
+      - name: Bun prebuild
+        run: bun prebuild
 
       - name: Install CocoaPods
         run: |
