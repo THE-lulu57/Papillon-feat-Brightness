@@ -13,11 +13,12 @@ jobs:
           node-version: 22  # ← 20 → 22 (nouvelle doc)
 
       - name: Install JS dependencies
-        run: npm install --legacy-peer-deps || true
+        run: npm install --legacy-peer-deps
+        # ↑ Retire le "|| true" — il cachait les vraies erreurs
 
       - name: Expo prebuild iOS
-        run: npx expo prebuild --platform ios --clean
-
+        run: ./node_modules/.bin/expo prebuild --platform ios --clean
+        # ↑ Utilise expo local au lieu de npx (qui télécharge une version aléatoire)
       - name: Install CocoaPods dependencies
         run: |
           cd ios
