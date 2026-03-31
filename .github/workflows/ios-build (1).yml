@@ -1,0 +1,52 @@
+name: iOS Build (Unsigned IPA)
+on:
+  workflow_dispatch:
+jobs:
+  ios:
+    runs-on: macos-26  # macos-26 n'est pas encore stable sur GH Actions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22  # ← 20 → 22 (nouvelle doc)
+
+      - name: Install JS dependencies
+        run: npm install --legacy-peer-deps
+        # ↑ Retire le "|| true" — il cachait les vraies erreurs
+
+      - name: Expo prebuild iOS
+        run: npx expo prebuild --platform ios --clean
+        # ↑ Utilise expo local au lieu de npx (qui télécharge une version aléatoire)
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+
+      - name: Archive iOS app (unsigned)
+        run: |
+          cd ios
+          xcodebuild archive \
+            -workspace Papillon.xcworkspace \
+            -scheme Papillon \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Papillon.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM= \
+            SKIP_INSTALL=NO
+
+      - name: Create IPA
+        run: |
+          cd ios/build
+          mkdir Payload
+          cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
+          zip -r Papillon.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Papillon.ipa
+          path: ios/build/Papillon.ipa
