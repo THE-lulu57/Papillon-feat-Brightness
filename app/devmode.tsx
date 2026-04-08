@@ -23,6 +23,7 @@ import { log } from "@/utils/logger/logger";
 import ModelManager from "@/utils/magic/ModelManager";
 import { scheduleNotificationAtDate } from "@/utils/notification/reminder/helper";
 import { initializeTransport } from "@/utils/transport";
+import NativeSwitch from "@/ui/native/NativeSwitch";
 
 export default function Devmode() {
   const accountStore = useAccountStore();
@@ -64,7 +65,7 @@ export default function Devmode() {
       <List>
         <Item>
           <Trailing>
-            <Switch
+            <NativeSwitch
               style={{ marginRight: 10 }}
               value={showLogsStore}
               onValueChange={() => {
@@ -304,7 +305,7 @@ export default function Devmode() {
               title: "Connexion impossible",
               description:
                 "Il semblerait que ta session a expiré. Tu pourras renouveler ta session dans les paramètres en liant à nouveau ton compte.",
-              icon: "TriangleAlert",
+              icon: "AlertTriangle",
               color: "#D60046",
               customButton: {
                 label: "Me reconnecter",
@@ -354,7 +355,7 @@ export default function Devmode() {
         <Item>
           <Typography variant="title">Activer Alert au Login</Typography>
           <Trailing>
-            <Switch
+            <NativeSwitch
               value={settingStore.showAlertAtLogin}
               onValueChange={value =>
                 mutateProperty("personalization", { showAlertAtLogin: value })

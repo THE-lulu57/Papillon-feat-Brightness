@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import packageJson from '@/package.json';
@@ -20,11 +20,13 @@ import WrappedBanner from './WrappedBanner';
 import { useTheme } from '@react-navigation/native';
 import AnimatedPressable from '@/ui/components/AnimatedPressable';
 import { PapillonAppearIn, PapillonAppearOut } from '@/ui/utils/Transition';
+import { ListTouchable } from '@/ui/new/List';
 
 const HomeHeader = () => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+  const theme = useTheme();
+  const { colors } = theme;
   const { availableCanteenCards, attendancesPeriods, attendances, absencesCount, chats } = useHomeHeaderData();
   const settingsStore = useSettingsStore(state => state.personalization);
   const mutateProperty = useSettingsStore(state => state.mutateProperty);
@@ -100,7 +102,7 @@ const HomeHeader = () => {
   ], [availableCanteenCards, absencesCount, chats, attendancesPeriods, attendances, t]);
 
   return (
-    <View style={{ paddingHorizontal: 0, paddingVertical: 12, width: "100%", flex: 1 }}>
+    <View style={{ paddingHorizontal: 0, width: "100%", flex: 1 }}>
       <View style={{ height: insets.top + 56 }} />
       <LiquidGlassContainer>
         <Stack inline flex width={"100%"}>
@@ -119,37 +121,43 @@ const HomeHeader = () => {
       </LiquidGlassContainer>
 
       {showReleaseNotesBanner && (
-        <AnimatedPressable
-          onPress={() =>
-            WebBrowser.openBrowserAsync(releaseNotesUrl, {
-              presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
-            })
-          }
-          >
-          <Stack card style={{ marginTop: 12 }} padding={[12, 10]} gap={8} direction='horizontal'>
-            <Papicons name="sparkles" size={24} color={colors.primary} />
 
-            <Stack inline flex style={{ marginRight: 32 }}>
-              <Typography variant='title'>
-                {t("Home_Release_Notes_Banner", { version: currentVersion })}
-              </Typography>
-              <Typography variant='body1' color="secondary">
-                {t("Home_Release_Notes_Banner_Description")}
-              </Typography>
+        <Stack card style={{ marginTop: 12, elevation: 2, backgroundColor: (!theme.dark && Platform.OS === 'android') ? '#FFF' : theme.colors.item, overflow: Platform.OS === 'android' ? 'hidden' : 'visible' }} padding={0}>
+          <ListTouchable
+            onPress={() =>
+              WebBrowser.openBrowserAsync(releaseNotesUrl, {
+                presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+              })
+            }>
+            <Stack padding={[12, 10]} gap={8} direction='horizontal'>
+              <Papicons name="sparkles" size={24} color={colors.tint} />
+
+              <Stack inline flex style={{ marginRight: 32 }}>
+                <Typography variant='title'>
+                  {t("Home_Release_Notes_Banner", { version: currentVersion })}
+                </Typography>
+                <Typography variant='body1' color="secondary">
+                  {t("Home_Release_Notes_Banner_Description")}
+                </Typography>
+              </Stack>
+
+              <ListTouchable
+                hitSlop={10}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  mutateProperty("personalization", { releaseNotesSeenForVersion: currentVersion });
+                }}
+              >
+                <View 
+                style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.text + '11', position: "absolute", top: 10, right: 12 }}>
+                <Icon size={16}>
+                <Papicons name="Cross" />
+                </Icon>
+                </View>
+              </ListTouchable>
             </Stack>
-
-            <Pressable
-              hitSlop={10}
-              onPress={(event) => {
-                event.stopPropagation();
-                mutateProperty("personalization", { releaseNotesSeenForVersion: currentVersion });
-              }}
-              style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.text + '11', position: "absolute", top: 10, right: 12 }}
-            >
-              <Papicons name="Cross" size={16} />
-            </Pressable>
-          </Stack>
-        </AnimatedPressable>
+          </ListTouchable>
+        </Stack>
       )}
 
       {__DEV__ && 1 === 2 && (

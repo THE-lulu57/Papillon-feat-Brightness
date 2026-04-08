@@ -4,7 +4,7 @@ import { useTheme } from '@react-navigation/native';
 import { LiquidGlassView } from '@sbaiahmed1/react-native-blur';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 import { Pressable } from 'react-native';
 
 import { initializeAccountManager } from '@/services/shared';
@@ -17,6 +17,7 @@ import { runsIOS26 } from '@/ui/utils/IsLiquidGlass';
 import { useUserProfileData } from '../hooks/useUserProfileData';
 import { t } from 'i18next';
 import { formatSchoolName } from '@/utils/format/formatSchoolName';
+import ActionMenu from '@/ui/components/ActionMenu';
 
 const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () => void }) => {
   const router = useRouter();
@@ -24,6 +25,13 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
   const accounts = useAccountStore((state) => state.accounts);
   const lastUsedAccount = useAccountStore((state) => state.lastUsedAccount);
   const theme = useTheme();
+
+  const AccountsMenuItems = (accounts && accounts.length > 0) && accounts.map((account) => ({
+    id: account.id,
+    title: account.firstName + ' ' + account.lastName,
+    subtitle: formatSchoolName(account.schoolName ?? ""),
+    state: account.id === lastUsedAccount ? 'on' : 'off',
+  })) || [];
 
   return (
     <Stack inline flex>
@@ -52,14 +60,14 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
         </Pressable>
 
         <UserProfileItemContainer>
-          <MenuView
+          <ActionMenu
             onPressAction={async ({ nativeEvent }) => {
-              if(nativeEvent.event === "edit") {
+              if (nativeEvent.event === "edit") {
                 router.push('/(modals)/profile');
                 return;
               }
 
-              if(nativeEvent.event === "add") {
+              if (nativeEvent.event === "add") {
                 router.push("/(onboarding)/ageSelection?action=addService");
                 return;
               }
@@ -69,27 +77,24 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
               await initializeAccountManager();
             }}
             actions={[
-              {
+              ...Platform.OS === "ios" ? [{
                 id: 'workspaces',
                 title: '',
                 displayInline: true,
-                subactions: accounts.map((account) => ({
-                  id: account.id,
-                  title: account.firstName + ' ' + account.lastName,
-                  subtitle: formatSchoolName(account.schoolName ?? ""),
-                  state: account.id === lastUsedAccount ? 'on' : 'off',
-                })),
-              },
+                subactions: AccountsMenuItems,
+              }] : AccountsMenuItems,
               {
                 id: 'edit',
                 title: t('Home_Edit_Profile'),
                 image: 'person.crop.circle',
+                papicon: 'user',
                 imageColor: theme.colors.text,
               },
               {
                 id: 'add',
                 title: t('Home_Add_Profile'),
                 image: 'plus',
+                papicon: 'add',
                 imageColor: theme.colors.text,
               },
             ]}
@@ -107,7 +112,7 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
                 </Typography>
               }
             </Stack>
-          </MenuView>
+          </ActionMenu>
         </UserProfileItemContainer>
       </Stack>
     </Stack>
@@ -134,7 +139,7 @@ const UserProfileItemContainer = ({ children }: { children: React.ReactNode }) =
 
 
   return (
-    <Stack backgroundColor="#FFFFFF40" radius={300}>
+    <Stack style={{ marginRight: -8 }}>
       {children}
     </Stack>
   )

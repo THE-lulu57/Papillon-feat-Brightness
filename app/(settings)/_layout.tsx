@@ -5,6 +5,7 @@ import { Platform, StatusBar } from "react-native";
 import { runsIOS26 } from "@/ui/utils/IsLiquidGlass";
 import { screenOptions } from "@/utils/theme/ScreenOptions";
 import { t } from "i18next";
+import AndroidHeaderBackground from "@/components/AndroidHeaderBackground";
 
 export default function Layout() {
 
@@ -14,16 +15,19 @@ export default function Layout() {
     headerLargeTitle: false,
     headerTransparent: runsIOS26,
     headerShadowVisible: false,
+    headerBackground: AndroidHeaderBackground
   }), []);
 
   return (
     <>
-      <StatusBar barStyle="light-content" animated />
+      {Platform.OS === "ios" && <StatusBar barStyle="light-content" animated />}
       <Stack screenOptions={newScreenOptions}>
         <Stack.Screen
           name="settings"
           options={{
             headerTitle: t("Tab_Settings"),
+            headerBackground: AndroidHeaderBackground,
+            headerTransparent: true
           }}
         />
 
@@ -48,6 +52,7 @@ export default function Layout() {
             headerBackButtonDisplayMode: "minimal",
             headerTransparent: true,
             headerLargeTitle: false,
+            headerBackground: null
           }}
         />
 

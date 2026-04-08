@@ -1,8 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import { t } from "i18next";
 import React, { useCallback, useRef, useState } from "react";
-import { FlatList, StyleSheet,View } from "react-native";
-import { useBottomTabBarHeight } from "react-native-bottom-tabs";
+import { FlatList, Platform, StyleSheet,View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CourseStatus } from "@/services/shared/timetable";
@@ -18,7 +17,7 @@ export default function TabOneScreen() {
   const calendarRef = useRef<any>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const insets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = insets.bottom;
 
   const accounts = useAccountStore(state => state.accounts);
   const lastUsedAccount = useAccountStore(state => state.lastUsedAccount);
@@ -91,7 +90,7 @@ export default function TabOneScreen() {
           renderItem={renderDay}
           keyExtractor={(_, index) => "renderDay:" + String(index)}
           onScroll={onScroll}
-          decelerationRate={0.98}
+          decelerationRate={Platform.OS === 'ios' ? 0.98 : undefined}
           disableIntervalMomentum={true}
           scrollEventThrottle={16}
           onMomentumScrollEnd={onMomentumScrollEnd}

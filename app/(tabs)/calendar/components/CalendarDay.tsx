@@ -1,7 +1,7 @@
 import { useNavigation } from "expo-router";
 import { t } from "i18next";
 import React, { useMemo, useRef } from "react";
-import { Dimensions,FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { Dimensions,FlatList, Platform, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { Transit } from "@/components/Transit";
 import { Course as SharedCourse, CourseStatus } from "@/services/shared/timetable";
@@ -107,6 +107,8 @@ export const CalendarDay = React.memo(({ dayDate, courses, isRefreshing, onRefre
     return result;
   }, [dayEvents]);
 
+  const isEmpty = enrichedEvents.length === 0;
+
   return (
     <View style={{ width: Dimensions.get("window").width, flex: 1 }}>
       <FlatList
@@ -117,8 +119,9 @@ export const CalendarDay = React.memo(({ dayDate, courses, isRefreshing, onRefre
           paddingHorizontal: 12,
           paddingVertical: 12,
           gap: 4,
-          paddingTop: headerHeight + 6,
+          paddingTop: headerHeight - 8,
           paddingBottom: tabBarHeight + 6,
+          ...(isEmpty ? { alignItems: "center" } : {}),
         }}
         refreshControl={
           <RefreshControl
@@ -126,6 +129,7 @@ export const CalendarDay = React.memo(({ dayDate, courses, isRefreshing, onRefre
             onRefresh={onRefresh}
             colors={[colors.primary]}
             progressBackgroundColor={colors.background}
+            progressViewOffset={Platform.OS === 'android' ? headerHeight : 0}
           />
         }
         keyExtractor={item => item.id}
