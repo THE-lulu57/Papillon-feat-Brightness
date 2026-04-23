@@ -270,6 +270,16 @@ export const mySchema = appSchema({
         { name: 'currency', type: 'string' },
         { name: 'amount', type: 'number' },
       ]
+    }),
+    tableSchema({
+      name: "papicard",
+      columns: [
+        { name: 'label', type: 'string' },
+        { name: 'type', type: 'string' },
+        { name: 'data', type: 'string' },
+        { name: 'color', type: 'string' },
+        { name: 'account_id', type: 'string' }
+      ]
     })
   ],
 });
