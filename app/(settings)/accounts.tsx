@@ -1,6 +1,6 @@
 import { Papicons } from "@getpapillon/papicons";
 import { MenuView, NativeActionEvent } from "@react-native-menu/menu";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React from "react";
 import { Alert, Image, ScrollView } from "react-native";
 
@@ -14,8 +14,12 @@ import List from "@/ui/new/List";
 import Typography from "@/ui/new/Typography";
 import { getInitials } from "@/utils/chats/initials";
 import { formatSchoolName } from "@/utils/format/formatSchoolName";
-import { getServiceLogo, getServiceName } from "@/utils/services/helper";
+import { getServiceLogo, getServiceName, getServiceBackground } from "@/utils/services/helper";
 import ActionMenu from "@/ui/components/ActionMenu";
+import { useState, useCallback } from "react";
+import { getPapicardsAsBalances, removePapicard } from "@/database/usePapicard";
+import { Balance } from "@/services/shared/balance";
+import { Services } from "@/stores/account/types";
 
 export default function AccountsView() {
   const accounts = useAccountStore(state => state.accounts);
@@ -66,6 +70,15 @@ export default function AccountsView() {
     ]);
   };
 
+  const [papicards, setPapicards] = useState<(Balance & { color: string })[]>([]);
+  useFocusEffect(
+    useCallback(() => {
+      getPapicardsAsBalances().then((cards) => {
+        setPapicards(cards as any);
+      });
+    }, [])
+  );
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -101,7 +114,7 @@ export default function AccountsView() {
                 imageUrl={
                   account.customisation?.profilePicture
                     ? "data:image/png;base64," +
-                      account.customisation?.profilePicture
+                    account.customisation?.profilePicture
                     : undefined
                 }
                 size={38}
@@ -220,6 +233,52 @@ export default function AccountsView() {
             </List.Trailing>
           </List.Item>
         ))}
+        {papicards?.map(card => (
+          <List.Item key={card.createdByAccount}>
+            <List.Leading>
+              <Image source={getServiceBackground(Services.PAPICARD, card.color)}
+                style={{
+                  width: 60,
+                  height: 40,
+                  borderRadius: 4,
+                }}
+              />
+            </List.Leading>
+            <Typography variant="title">
+              {getServiceName(Services.PAPICARD, card.label)}
+            </Typography>
+            <List.Trailing>
+              <ActionMenu
+                actions={[
+                  {
+                    id: "delete",
+                    title: "Supprimer",
+                    attributes: { destructive: true }
+                  }
+                ]}
+                onPressAction={(event: NativeActionEvent) => {
+                  if (event.nativeEvent.event === "delete") {
+                    Alert.alert(card.label, "Supprimer cette carte ?", [
+                      { text: "Annuler", style: "cancel" },
+                      {
+                        text: "Supprimer",
+                        style: "destructive",
+                        onPress: async () => {
+                          const cardId = card.createdByAccount.replace("papicard_", "");
+                          await removePapicard(cardId);
+                          setPapicards(prev => prev.filter(c => c.createdByAccount !== card.createdByAccount));
+                        },
+                      },
+                    ]);
+                  }
+                }}
+              >
+                <Icon opacity={0.7}><Papicons name="Menu" /></Icon>
+              </ActionMenu>
+            </List.Trailing>
+          </List.Item>
+        ))}
+
         <List.Item
           onPress={() =>
             router.navigate({
