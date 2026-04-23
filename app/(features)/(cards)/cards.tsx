@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Platform, Pressable, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { getPapicardsAsBalances } from "@/database/usePapicard";
 
 export default function QRCodeAndCardsPage() {
   const [wallets, setWallets] = useState<Balance[]>([]);
@@ -30,19 +31,19 @@ export default function QRCodeAndCardsPage() {
   const account = accounts.find((a) => a.id === lastUsedAccount);
 
   async function fetchWallets() {
-    const manager = getManager()
-    const balances = await manager.getCanteenBalances()
-    const result: Balance[] = []
-    for (const balance of balances) {
-      result.push(balance)
-    }
+    const manager = getManager();
+
+    const onlineBalances = await manager.getCanteenBalances();
+    const manualBalances = await getPapicardsAsBalances();
+    const result = [...onlineBalances, ...manualBalances];
     setWallets(result);
   }
 
-  useEffect(() => {
-    setWallets([])
-    fetchWallets();
-  }, [accounts])
+  useFocusEffect(
+    useCallback(() => {
+      setWallets([]);
+      fetchWallets();
+    }, [accounts]));
 
   const { t } = useTranslation();
 
@@ -76,6 +77,7 @@ export default function QRCodeAndCardsPage() {
         contentInsetAdjustmentBehavior="automatic" style={{ flex: 1, paddingTop: headerHeight - 16 }} contentContainerStyle={{ padding: 20, gap: 16 }}
       >
         {wallets.map((c, i) => {
+          const serviceId = c.serviceId ?? account?.services.find(service => service.id === c.createdByAccount)?.serviceId ?? Services.TURBOSELF;
           return (
             <Dynamic
               animated
@@ -87,7 +89,7 @@ export default function QRCodeAndCardsPage() {
                 key={c.createdByAccount + c.label}
                 index={i}
                 wallet={c}
-                service={account?.services.find(service => service.id === c.createdByAccount)?.serviceId ?? Services.TURBOSELF}
+                service={serviceId}
                 totalCards={wallets.length}
               />
             </Dynamic>
@@ -112,7 +114,7 @@ export default function QRCodeAndCardsPage() {
         <Dynamic animated>
           <Button
             fullWidth
-            label="Ajouter"
+            label={t("Context_Add")}
             leading={<Plus color="#FFF" />}
             onPress={() => {
               router.navigate({
@@ -141,14 +143,37 @@ export function Card({
 }) {
   const [pressed, setPressed] = useState(false);
 
+  // For Papicard Service
+  const walletData = wallet as any;
+  const color = walletData.color;
+  const cardId = wallet.createdByAccount?.replace("papicard_", "") ?? "";
+  const qrType = walletData.qrType || 'QR';
+  const customLabel = wallet.label;
+  const ServiceName = getServiceName(service, service === Services.PAPICARD ? customLabel : undefined);
+
   return (
     <Pressable
       onPress={() => {
         if (!disabled) {
-          router.push({
-            pathname: "/(features)/(cards)/specific",
-            params: { serviceName: getServiceName(service), service: service, wallet: JSON.stringify(wallet) }
-          });
+          if (service === Services.PAPICARD) {
+            router.push({
+              pathname: "/(features)/(cards)/qrcode",
+              params: {
+                cardId,
+                type: qrType,
+                service: service.toString()
+              }
+            });
+          } else {
+            router.push({
+              pathname: "/(features)/(cards)/specific",
+              params: {
+                serviceName: getServiceName(service),
+                service: service,
+                wallet: JSON.stringify(wallet)
+              }
+            });
+          }
         }
       }}
       onPressIn={() => setPressed(true)}
@@ -167,14 +192,14 @@ export function Card({
       disabled={disabled}
     >
       <Image
-        source={getServiceBackground(service)}
+        source={getServiceBackground(service, service === Services.PAPICARD ? color : undefined)}
         style={{
           position: "absolute",
           bottom: 0,
           right: 0,
           left: 0,
           width: "100%",
-          height: '100%',
+          height: "100%",
         }}
         resizeMode="cover"
       />
@@ -221,17 +246,19 @@ export function Card({
               source={getServiceLogo(service)}
               resizeMode="cover"
             />
-            <Typography variant="title" color={"#FFFFFF"}>{getServiceName(service)}</Typography>
+            <Typography variant="title" color={"#FFFFFF"}>{ServiceName}</Typography>
           </Stack>
 
-          <Stack gap={0} direction="vertical">
-            <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
-              {wallet.label}
-            </Typography>
-            <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
-              {(wallet.amount / 100).toFixed(2)} {wallet.currency}
-            </Typography>
-          </Stack>
+          {service !== Services.PAPICARD && (
+            <Stack gap={0} direction="vertical">
+              <Typography variant="caption" align="right" color={"#FFFFFF" + 90} style={{ width: "100%", lineHeight: 0 }}>
+                {wallet.label}
+              </Typography>
+              <Typography variant="title" align="right" color={"#FFFFFF"} style={{ width: "100%", lineHeight: 0 }}>
+                {(wallet.amount / 100).toFixed(2)} {wallet.currency}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
       </View>
     </Pressable>
