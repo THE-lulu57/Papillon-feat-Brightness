@@ -1,10 +1,11 @@
+import { BarcodeCreatorView, BarcodeFormat } from "react-native-barcode-creator";
 import Barcode, { Format } from "@aramir/react-native-barcode";
 import { Phone } from "@getpapillon/papicons";
 import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimensions, Platform } from "react-native";
+import { Dimensions, Image, Platform } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import QRCode from "react-native-qrcode-svg";
 import Reanimated, {
@@ -16,6 +17,8 @@ import Reanimated, {
 } from "react-native-reanimated";
 
 import OnboardingBackButton from "@/components/onboarding/OnboardingBackButton";
+import { getDatabaseInstance } from "@/database/DatabaseProvider";
+import Papicard from "@/database/models/Papicard";
 import { Services } from "@/stores/account/types";
 import Stack from "@/ui/components/Stack";
 import Typography from "@/ui/components/Typography";
@@ -23,9 +26,39 @@ import Typography from "@/ui/components/Typography";
 export default function QRCodePage() {
 
   const search = useLocalSearchParams();
-  const qr = String(search.qrcode);
+  const cardId = String(search.cardId ?? "");
   const type = String(search.type || "QR");
   const service = Number(search.service || Services.TURBOSELF);
+
+  const [qr, setQr] = useState<string | null>(
+    service !== Services.PAPICARD ? String(search.qrcode) : null
+  );
+
+  const CREATOR_FORMATS: Record<string, { format: BarcodeFormat; style: { width: number; height: number } }> = {
+    AZTEC: {
+      format: BarcodeFormat.AZTEC,
+      style: {
+        width: Dimensions.get("window").width * 0.8,
+        height: Dimensions.get("window").width * 0.8,
+      },
+    },
+    PDF417: {
+      format: BarcodeFormat.PDF417,
+      style: {
+        width: Dimensions.get("window").width * 0.8,
+        height: 130,
+      },
+    },
+  };
+
+  useEffect(() => {
+    if (service !== Services.PAPICARD || !cardId) return;
+    getDatabaseInstance()
+      .get<Papicard>("papicard")
+      .find(cardId)
+      .then((card) => setQr(card.data))
+      .catch(() => setQr(""));
+  }, [cardId]);
 
   const { t } = useTranslation();
 
@@ -57,6 +90,7 @@ export default function QRCodePage() {
       scale.value = withSpring(1, { damping: 150, stiffness: 1500 });
     });
 
+  if (qr === null) return null;
 
   return (
     <GestureDetector
@@ -98,6 +132,23 @@ export default function QRCodePage() {
                 size={Dimensions.get("window").width * 0.8}
                 backgroundColor={"transparent"}
                 color={"#000"}
+              />
+            ) : type === "IMAGE" ? (
+              <Image
+                source={{ uri: qr }}
+                style={{
+                  width: Dimensions.get("window").width * 0.8,
+                  height: Dimensions.get("window").width * 0.8,
+                }}
+                resizeMode="contain"
+              />
+            ) : CREATOR_FORMATS[type] ? (
+              <BarcodeCreatorView
+                value={qr}
+                format={CREATOR_FORMATS[type].format}
+                background={"transparent"}
+                foregroundColor={"#000"}
+                style={CREATOR_FORMATS[type].style}
               />
             ) : (
               <Barcode
