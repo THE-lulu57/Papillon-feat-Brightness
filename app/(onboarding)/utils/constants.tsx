@@ -275,7 +275,8 @@ export interface SupportedRestaurant {
   name: string;
   title: string;
   hasLimitedSupport: boolean;
-  image: any;
+  image?: any;
+  icon?: React.ReactNode;
   type: string;
   onPress: () => void;
 }
@@ -320,6 +321,16 @@ export function GetSupportedRestaurants(redirect: (path: { pathname: string }) =
       type: "main",
       onPress: () => {
         redirect({ pathname: '/(onboarding)/restaurants/alise' });
+      }
+    },
+          {
+      name: "papicard",
+      title: t("PAPICARD_SERVICE_DESC"),
+      hasLimitedSupport: false,
+      icon: <Papicons name={"QrCode"} />,
+      type: "main",
+      onPress: () => {
+        redirect({ pathname: '../restaurants/papicard/credentials' });
       }
     }
   ]
