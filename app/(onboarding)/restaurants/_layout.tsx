@@ -43,6 +43,14 @@ export default function OnboardingLayout() {
         name="izly"
         options={{ ...newScreenOptions, headerTitle: t("ONBOARDING_SERVICE_IZLY") }}
       />
+      <Stack.Screen
+        name="papicard/scan"
+        options={{ ...newScreenOptions, headerTitle: "" }}
+      />
+      <Stack.Screen
+        name="papicard/modify-card"
+        options={{ ...newScreenOptions, headerTitle: t("ONBOARDING_SERVICE_PAPICARD_MODIFY") }}
+      />
     </Stack>
   );
 }
