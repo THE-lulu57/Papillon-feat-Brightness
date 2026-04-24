@@ -27,7 +27,8 @@ const HomeHeader = () => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { colors } = theme;
-  const { availableCanteenCards, attendancesPeriods, attendances, absencesCount, chats } = useHomeHeaderData();
+  const { availableCanteenCards, availablePapicards, attendancesPeriods, attendances, absencesCount, chats } = useHomeHeaderData();
+  const totalCanteenCards = availableCanteenCards.length + availablePapicards;
   const settingsStore = useSettingsStore(state => state.personalization);
   const mutateProperty = useSettingsStore(state => state.mutateProperty);
   const currentVersion = packageJson.version;
@@ -54,8 +55,8 @@ const HomeHeader = () => {
       title: t("Home_Cards_Button_Title"),
       icon: "card",
       color: "#EE9F00",
-      description: availableCanteenCards.length > 0 ?
-        (availableCanteenCards.length > 1 ? t("Home_Cards_Button_Description_Number", { number: availableCanteenCards.length }) :
+      description: totalCanteenCards > 0 ?
+        (totalCanteenCards > 1 ? t("Home_Cards_Button_Description_Number", { number: totalCanteenCards }) :
           t("Home_Cards_Button_Description_Singular")) : t("Home_Cards_Button_Description_None"),
       onPress: () => {
         router.push("/(features)/(cards)/cards");
@@ -99,7 +100,7 @@ const HomeHeader = () => {
         router.push("/(features)/soon");
       }
     }
-  ], [availableCanteenCards, absencesCount, chats, attendancesPeriods, attendances, t]);
+  ], [availableCanteenCards, availablePapicards, absencesCount, chats, attendancesPeriods, attendances, t]);
 
   return (
     <View style={{ paddingHorizontal: 0, width: "100%", flex: 1 }}>
