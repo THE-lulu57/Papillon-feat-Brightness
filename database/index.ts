@@ -16,6 +16,7 @@ import { Balance } from './models/Balance';
 import CanteenHistoryItem from './models/CanteenHistory';
 import Kid from './models/Kid';
 import { mySchema } from './schema';
+import Papicard from './models/Papicard';
 
 const adapter = new SQLiteAdapter({
   schema: mySchema,
@@ -44,6 +45,7 @@ export const database = new Database({
     Course,
     Kid,
     Balance,
-    CanteenHistoryItem
+    CanteenHistoryItem,
+    Papicard
   ],
 });
