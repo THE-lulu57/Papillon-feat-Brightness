@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const mySchema = appSchema({
-  version: 37,
+  version: 38,
   tables: [
     tableSchema({
       name: 'events',
@@ -269,6 +269,16 @@ export const mySchema = appSchema({
         { name: 'label', type: 'string' },
         { name: 'currency', type: 'string' },
         { name: 'amount', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: "papicard",
+      columns: [
+        { name: 'label', type: 'string' },
+        { name: 'type', type: 'string' },
+        { name: 'data', type: 'string' },
+        { name: 'color', type: 'string' },
+        { name: 'account_id', type: 'string' }
       ]
     })
   ],
