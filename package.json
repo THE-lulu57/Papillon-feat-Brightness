@@ -91,6 +91,7 @@
     "react-dom": "19.2.0",
     "react-i18next": "^15.7.4",
     "react-native": "0.83.4",
+    "react-native-barcode-creator":"0.2.0",
     "react-native-bottom-tabs": "^1.1.0",
     "react-native-dynamic-theme": "^0.3.4",
     "react-native-edge-to-edge": "1.6.0",
