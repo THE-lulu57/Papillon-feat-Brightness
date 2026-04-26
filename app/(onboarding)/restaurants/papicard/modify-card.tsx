@@ -76,7 +76,7 @@ export default function PreviewPapicardPage() {
                         height: 210,
                         borderRadius: 20,
                         overflow: "hidden",
-                        marginTop: Platform.OS === 'android' ? insets.top + 40 : 40,
+                        marginTop: Platform.OS === 'android' ? insets.top + 40 : 50,
                         marginBottom: 5,
                         alignItems: "center",
                     }}
