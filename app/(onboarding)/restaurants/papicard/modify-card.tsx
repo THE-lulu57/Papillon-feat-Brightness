@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, Image } from "react-native";
+import { View, ScrollView, Image, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Button from "@/ui/new/Button";
@@ -69,7 +69,6 @@ export default function PreviewPapicardPage() {
             <ScrollView
                 contentContainerStyle={{ padding: 24, gap: 20 }}
                 keyboardShouldPersistTaps="handled"
-                contentInsetAdjustmentBehavior="never"
             >
                 <View
                     style={{
@@ -77,7 +76,7 @@ export default function PreviewPapicardPage() {
                         height: 210,
                         borderRadius: 20,
                         overflow: "hidden",
-                        marginTop: insets.top + 40,
+                        marginTop: Platform.OS === 'android' ? insets.top + 40 : 50,
                         marginBottom: 5,
                         alignItems: "center",
                     }}
