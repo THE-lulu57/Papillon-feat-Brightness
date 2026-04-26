@@ -67,7 +67,12 @@ export default function PreviewPapicardPage() {
     return (
         <View style={{ flex: 1, marginBottom: insets.bottom }}>
             <ScrollView
-                contentContainerStyle={{ padding: 24, gap: 20 }}
+                contentContainerStyle={{
+                    paddingHorizontal: 24,
+                    paddingBottom: 24,
+                    paddingTop: 0,
+                    gap: 20
+                }}
                 keyboardShouldPersistTaps="handled"
                 contentInsetAdjustmentBehavior="never"
             >
