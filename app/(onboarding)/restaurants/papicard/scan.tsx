@@ -3,7 +3,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ export default function ScanPapicardPage() {
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const scannedRef = useRef(false);
 
   useEffect(() => {
     if (!permission?.granted) {
@@ -39,11 +40,16 @@ export default function ScanPapicardPage() {
     }
   }, [permission?.granted, requestPermission]);
 
-  useFocusEffect(useCallback(() => { setScanned(false); }, []));
+  useFocusEffect(useCallback(() => {
+    scannedRef.current = false;
+    setScanned(false);
+  }, []));
 
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-    if (scanned) return;
+    if (scannedRef.current) return;
+    scannedRef.current = true;
     setScanned(true);
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.push({ pathname: "../papicard/modify-card", params: { data, type: normalizeType(type) } });
   };
