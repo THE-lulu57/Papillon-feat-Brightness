@@ -3,12 +3,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { useScreenOptions } from "@/utils/theme/ScreenOptions";
-import AndroidHeaderBackground from "@/components/AndroidHeaderBackground";
+import { useAndroidHeaderProps } from "@/components/AndroidHeaderBackground";
 import { Platform } from "react-native";
 
 export default function Layout() {
   const { t } = useTranslation();
   const screenOptions = useScreenOptions();
+  const androidHeaderProps = useAndroidHeaderProps();
 
   return (
     <Stack screenOptions={screenOptions}>
@@ -30,7 +31,7 @@ export default function Layout() {
           presentation: Platform.OS !== "ios" ? "modal" : "formSheet",
           sheetGrabberVisible: true,
           sheetAllowedDetents: [0.5, 1],
-          headerBackground: AndroidHeaderBackground,
+          ...androidHeaderProps,
         }}
       />
     </Stack>

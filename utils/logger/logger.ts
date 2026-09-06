@@ -52,16 +52,22 @@ function log(message: string, from?: string): void {
   console.log(entry);
 }
 
+// Native connectivity failures (no signal, DNS down, TLS/SSL failure, timeout, etc).
+// These aren't application bugs, so they're kept in local logs but not reported to PostHog.
+const NETWORK_ERROR_PATTERN = /fetch failed: UnexpectedException/i;
+
 function error(message: string, from?: string): Error {
   const date = getIsoDate()
   const functionName = obtainFunctionName(from)
   saveLog(date, message, LogType.ERROR, functionName);
   console.error(message);
-  checkConsent().then(consent => {
-    if (consent.given && consent.level !== "none") {
-      posthog.captureException(new Error(message));
-    }
-  });
+  if (!NETWORK_ERROR_PATTERN.test(message)) {
+    checkConsent().then(consent => {
+      if (consent.given && consent.level !== "none") {
+        posthog.captureException(new Error(message));
+      }
+    });
+  }
   return new Error(message);
 }
 

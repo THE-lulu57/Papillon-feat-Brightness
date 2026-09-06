@@ -395,7 +395,7 @@ class ModelManager {
         wordIndex = JSON.parse(wordIndexRaw);
       } else if (indexWordFile.exists) {
         const indexWordRaw = await indexWordFile.text();
-        const indexWord = JSON.parse(indexWordRaw);
+        const indexWord = JSON.parse(indexWordRaw) ?? {};
         wordIndex = {};
         for (const [index, word] of Object.entries(indexWord)) {
           if (typeof word === "string") {
@@ -433,7 +433,7 @@ class ModelManager {
       const labelToIdFile = new File(dirUri + "model/label_to_id.json");
       if (labelToIdFile.exists) {
         const labelToIdRaw = await labelToIdFile.text();
-        this.labelToId = JSON.parse(labelToIdRaw);
+        this.labelToId = JSON.parse(labelToIdRaw) ?? {};
       } else {
         this.labelToId = {};
         for (let i = 0; i < this.labels.length; i++) {

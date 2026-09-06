@@ -77,6 +77,10 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
                 return;
               }
 
+              if (nativeEvent.event === "workspaces" || !accounts.some(account => account.id === nativeEvent.event)) {
+                return;
+              }
+
               const store = useAccountStore.getState();
               const settingsStore = useSettingsStore.getState();
               const currentAccountId = store.lastUsedAccount;

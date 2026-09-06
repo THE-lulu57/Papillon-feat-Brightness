@@ -17,12 +17,13 @@ import {
 import getCorners from '@/ui/utils/Corners';
 import { runsIOS26 } from '@/ui/utils/IsLiquidGlass';
 import { screenOptions } from '@/utils/theme/ScreenOptions';
-import AndroidHeaderBackground from './AndroidHeaderBackground';
+import { useAndroidHeaderProps } from './AndroidHeaderBackground';
 import MainTabErrorBoundary from '@/ui/components/MainTabErrorBoundary';
 
 function RootNavigatorContent() {
   const theme = useTheme();
   const corners = getCorners();
+  const androidHeaderProps = useAndroidHeaderProps();
 
   // Memoize combined screen options to prevent object recreation
   const stackScreenOptions = useMemo(() => ({
@@ -107,7 +108,7 @@ function RootNavigatorContent() {
             contentStyle: {
               backgroundColor: theme.colors.card,
             },
-            headerBackground: AndroidHeaderBackground,
+            ...androidHeaderProps,
           }}
         />
 
@@ -117,7 +118,7 @@ function RootNavigatorContent() {
             presentation: "formSheet",
             headerLargeTitle: false,
             headerTitle: t("Modal_Profile_Title"),
-            headerBackground: AndroidHeaderBackground,
+            ...androidHeaderProps,
           }}
         />
         <Stack.Screen
@@ -130,7 +131,7 @@ function RootNavigatorContent() {
             presentation: Platform.OS !== "ios" ? "modal" : "formSheet",
             sheetGrabberVisible: true,
             sheetAllowedDetents: [0.5, 1],
-            headerBackground: AndroidHeaderBackground,
+            ...androidHeaderProps,
             contentStyle: {
               borderRadius: Platform.OS === "ios" ? 30 : 0,
               overflow: Platform.OS === "ios" ? "hidden" : "visible",
@@ -161,7 +162,7 @@ function RootNavigatorContent() {
             headerLargeTitle: false,
             presentation: "modal",
             gestureEnabled: false,
-            headerBackground: AndroidHeaderBackground,
+            ...androidHeaderProps,
           }}
         />
 
@@ -197,7 +198,7 @@ function RootNavigatorContent() {
             sheetGrabberVisible: true,
             sheetAllowedDetents: "fitToContents",
             headerTitle: t("Modal_Soon"),
-            headerBackground: AndroidHeaderBackground,
+            ...androidHeaderProps,
           }}
         />
 

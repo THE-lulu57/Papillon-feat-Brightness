@@ -284,7 +284,7 @@ const ScodocUES: React.FC<{ data: UEMap, displayScale: GradeDisplayScale }> = ({
                   <List.SectionTitle>
                     <List.Label>SAE</List.Label>
                   </List.SectionTitle>
-                  {Object.entries(data[openedUE].saes).map(([key, value]) => (
+                  {Object.entries(data[openedUE].saes ?? {}).map(([key, value]) => (
                     <List.Item key={key}>
                       <Typography variant='title'>
                         {key}
@@ -314,7 +314,7 @@ const ScodocUES: React.FC<{ data: UEMap, displayScale: GradeDisplayScale }> = ({
                   <List.SectionTitle>
                     <List.Label>Ressources</List.Label>
                   </List.SectionTitle>
-                  {Object.entries(data[openedUE].ressources).map(([key, value]) => (
+                  {Object.entries(data[openedUE].ressources ?? {}).map(([key, value]) => (
                     <List.Item key={key}>
                       <Typography variant='title'>
                         {key}

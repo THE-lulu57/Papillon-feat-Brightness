@@ -78,7 +78,8 @@ const isPermanentAuthError = (e: unknown): boolean =>
   e instanceof SessionExpiredError ||
   e instanceof AccessDeniedError ||
   e instanceof AccountDisabledError ||
-  e instanceof SecurityError;
+  e instanceof SecurityError ||
+  /\b401\b|unauthorized/i.test(String(e));
 import { Balance } from "./balance";
 import { Kid } from "./kid";
 
