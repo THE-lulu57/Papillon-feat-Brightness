@@ -14,7 +14,6 @@ import {
   DEVMODE_SCREEN_OPTIONS,
   STACK_SCREEN_OPTIONS
 } from '@/constants/LayoutScreenOptions';
-import getCorners from '@/ui/utils/Corners';
 import { runsIOS26 } from '@/ui/utils/IsLiquidGlass';
 import { screenOptions } from '@/utils/theme/ScreenOptions';
 import { useAndroidHeaderProps } from './AndroidHeaderBackground';
@@ -22,7 +21,6 @@ import MainTabErrorBoundary from '@/ui/components/MainTabErrorBoundary';
 
 function RootNavigatorContent() {
   const theme = useTheme();
-  const corners = getCorners();
   const androidHeaderProps = useAndroidHeaderProps();
 
   // Memoize combined screen options to prevent object recreation
@@ -81,19 +79,6 @@ function RootNavigatorContent() {
           options={DEVMODE_REQUESTS_SCREEN_OPTIONS}
         />
         <Stack.Screen name="alert" options={ALERT_SCREEN_OPTIONS} />
-
-        <Stack.Screen
-          name="(modals)/wrapped"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            animation: "flip",
-            contentStyle: {
-              borderRadius: corners > 2 ? corners - 2 : 0,
-              overflow: "hidden",
-            },
-          }}
-        />
 
         <Stack.Screen
           name="(modals)/wallpaper"
