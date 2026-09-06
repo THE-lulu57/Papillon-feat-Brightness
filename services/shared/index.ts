@@ -541,6 +541,16 @@ export class AccountManager {
     callback: (client: SchoolServicePlugin) => Promise<T | T[]>,
     options?: FetchOptions<T | T[]> & { multiple?: boolean }
   ): Promise<T | T[]> {
+    const callFallback = async (): Promise<T | T[]> => {
+      const fallbackResult = await options!.fallback!();
+      if (options?.multiple && Array.isArray(fallbackResult)) {
+        return fallbackResult.filter(
+          (item): item is T => item !== null && item !== undefined
+        );
+      }
+      return fallbackResult;
+    };
+
     try {
       if (options?.clientId !== undefined) {
         const client = this.clients[options.clientId];
@@ -557,7 +567,7 @@ export class AccountManager {
         }
         if (client.requiresInternet !== false && !(await this.hasInternet())) {
           if (options.fallback) {
-            return await options.fallback();
+            return await callFallback();
           }
           throw new Error("Internet not reachable and no fallback provided.");
         }
@@ -574,7 +584,7 @@ export class AccountManager {
         availableClients = availableClients.filter(client => client.requiresInternet === false);
         if (availableClients.length === 0 && options?.fallback) {
           warn("No internet connection, using fallback.");
-          return await options.fallback();
+          return await callFallback();
         }
       }
 
@@ -583,7 +593,7 @@ export class AccountManager {
           `No clients available for capability ${capability}, falling back to cache`
         );
         if (options?.fallback) {
-          return await options.fallback();
+          return await callFallback();
         }
         throw new Error(`No clients available for capability: ${capability}`);
       }
@@ -602,7 +612,7 @@ export class AccountManager {
       }
     } catch (e) {
       if (options?.fallback) {
-        return await options.fallback();
+        return await callFallback();
       }
       throw e;
     }

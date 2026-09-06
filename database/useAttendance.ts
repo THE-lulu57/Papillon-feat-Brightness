@@ -162,7 +162,7 @@ export async function addAttendanceToDatabase(attendances: SharedAttendance[], p
 }
 
 
-export async function getAttendanceFromCache(period: string): Promise<SharedAttendance> {
+export async function getAttendanceFromCache(period: string): Promise<SharedAttendance | undefined> {
   try {
     const database = getDatabaseInstance();
 

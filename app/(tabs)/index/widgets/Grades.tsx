@@ -148,9 +148,13 @@ const GradesWidget = ({ period, onEmptyStateChange }: GradesWidgetProps) => {
         }
 
         if (cache?.inFlight) {
-          const cachedGrades = await cache.inFlight;
-          setSubjects(cachedGrades.subjects);
-          setServiceAverage(cachedGrades.serviceAverage);
+          try {
+            const cachedGrades = await cache.inFlight;
+            setSubjects(cachedGrades.subjects);
+            setServiceAverage(cachedGrades.serviceAverage);
+          } catch (err) {
+            error(`Failed to fetch grades: ${err}`);
+          }
           return;
         }
 
@@ -160,8 +164,8 @@ const GradesWidget = ({ period, onEmptyStateChange }: GradesWidgetProps) => {
             periodToFetch.createdByAccount,
           );
           return {
-            subjects: result.subjects,
-            serviceAverage: result.studentOverall.value || undefined,
+            subjects: result?.subjects ?? [],
+            serviceAverage: result?.studentOverall?.value || undefined,
           };
         })();
 
