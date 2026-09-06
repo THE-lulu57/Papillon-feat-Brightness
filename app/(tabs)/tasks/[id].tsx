@@ -1,6 +1,6 @@
 import { Papicons } from "@getpapillon/papicons";
 import { useTheme } from "expo-router/react-navigation";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as WebBrowser from "expo-web-browser";
 import { t } from "i18next";
@@ -12,6 +12,7 @@ import { getManager } from "@/services/shared";
 import AnimatedPressable from "@/ui/components/AnimatedPressable";
 import Icon from "@/ui/components/Icon";
 import Stack from "@/ui/components/Stack";
+import { NativeHeaderPressable, NativeHeaderSide } from "@/ui/components/NativeHeader";
 import { formatHTML } from "@/utils/format/html";
 import { getAttachmentIcon } from "@/utils/news/getAttachmentIcon";
 import { getSubjectColor } from "@/utils/subjects/colors";
@@ -27,6 +28,7 @@ import { View } from "react-native";
 
 const Task = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const theme = useTheme();
   const colors = theme.colors;
   const [task, setTask] = useState<Homework>();
@@ -84,6 +86,16 @@ const Task = () => {
 
   return (
     <>
+      {Platform.OS === "android" && (
+        <NativeHeaderSide side="Left">
+          <NativeHeaderPressable onPress={() => router.back()}>
+            <Icon size={28}>
+              <Papicons name="ArrowLeft" />
+            </Icon>
+          </NativeHeaderPressable>
+        </NativeHeaderSide>
+      )}
+
       {Platform.OS !== "android" && (
         <LinearGradient
           colors={[subjectInfo.color, `${subjectInfo.color}00`]}
@@ -101,6 +113,7 @@ const Task = () => {
       )}
 
       <List
+        contentInsetAdjustmentBehavior="automatic"
         ListHeaderComponent={
           <ModalOverhead
             emoji={subjectInfo.emoji}
@@ -109,7 +122,7 @@ const Task = () => {
             color={Platform.OS === "ios" ? subjectInfo.color : colors.primary}
             date={new Date(task.dueDate)}
             style={{
-              marginVertical: 24,
+              marginVertical: 0,
               paddingTop: finalHeaderHeight,
             }}
           />

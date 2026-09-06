@@ -24,6 +24,10 @@ import GradesWidget from './widgets/Grades';
 import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from 'react-native-linear-gradient';
 import MainTabErrorBoundary from '@/ui/components/MainTabErrorBoundary';
+import { Dynamic } from '@/ui/components/Dynamic';
+import Stack from '@/ui/components/Stack';
+import Typography from '@/ui/components/Typography';
+import Icon from '@/ui/components/Icon';
 
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
@@ -86,6 +90,8 @@ const HomeScreen = () => {
     }
   ], [renderTimeTable, renderGrades, gradesWidgetHidden, timetableTitle, courses.length]);
 
+  const allWidgetsHidden = data.every(item => item.hidden);
+
   React.useEffect(() => {
     if (!account || welcomeModalSeen) {
       return;
@@ -122,11 +128,29 @@ const HomeScreen = () => {
             marginHorizontal: 'auto',
           }}
           data={data}
+          ListFooterComponent={allWidgetsHidden ? <HomeEmptyState /> : null}
         />
       </HomeViewContainer>
     </>
   );
 };
+
+const HomeEmptyState = React.memo(() => (
+  <Dynamic animated key="home-widgets:empty" style={{ width: "100%" }}>
+    <Stack hAlign="center" vAlign="center" flex padding={[22, 16]} gap={2} style={{ width: "100%" }}>
+      <Icon papicon opacity={0.5} size={32} style={{ marginBottom: 3 }}>
+        <Papicons name={"Ghost"} />
+      </Icon>
+      <Typography variant="h4" color="text" align="center">
+        {t("Home_Widgets_Empty_Title")}
+      </Typography>
+      <Typography variant="body2" color="secondary" align="center">
+        {t("Home_Widgets_Empty_Description")}
+      </Typography>
+    </Stack>
+  </Dynamic>
+));
+HomeEmptyState.displayName = "HomeEmptyState";
 
 const HomeViewContainer = ({ children }) => {
   const insets = useSafeAreaInsets();

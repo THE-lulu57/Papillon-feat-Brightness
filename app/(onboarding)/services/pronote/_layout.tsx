@@ -14,6 +14,7 @@ export default function OnboardingLayout() {
     ...screenOptions,
     headerShown: true,
     ...androidHeaderProps,
+    headerBackVisible: true,
     headerTransparent: true,
     headerBackButtonDisplayMode: "minimal",
     headerLargeTitle: false,

@@ -1,6 +1,6 @@
 import { Papicons } from '@getpapillon/papicons';
 import { useTheme } from "expo-router/react-navigation";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, View } from "react-native";
@@ -14,6 +14,7 @@ import ContainedNumber from "@/ui/components/ContainedNumber";
 import Icon from "@/ui/components/Icon";
 import Stack from "@/ui/components/Stack";
 import TypographyLegacy from "@/ui/components/Typography";
+import { NativeHeaderPressable, NativeHeaderSide } from "@/ui/components/NativeHeader";
 import adjust from '@/utils/adjustColor';
 import { colorCheck } from '@/utils/colorCheck';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -84,6 +85,7 @@ const GradeBadge = ({
 
 export default function GradesModal() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const theme = useTheme();
   const colors = theme.colors;
   const [grade, setGrade] = useState<SharedGrade>();
@@ -197,6 +199,16 @@ export default function GradesModal() {
   };
   return (
     <>
+      {Platform.OS === "android" && (
+        <NativeHeaderSide side="Left">
+          <NativeHeaderPressable onPress={() => router.back()}>
+            <Icon size={28}>
+              <Papicons name="ArrowLeft" />
+            </Icon>
+          </NativeHeaderPressable>
+        </NativeHeaderSide>
+      )}
+
       {Platform.OS !== "android" && (
         <LinearGradient
           colors={[subjectInfo.color, colors.background]}

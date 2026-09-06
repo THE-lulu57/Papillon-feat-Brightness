@@ -7,9 +7,11 @@ import { getSubjectEmoji } from "@/utils/subjects/emoji";
 import { getSubjectName } from "@/utils/subjects/name";
 import { Papicons } from "@getpapillon/papicons";
 import { useRoute, useTheme } from "expo-router/react-navigation";
+import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { Platform, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import { NativeHeaderPressable, NativeHeaderSide } from "@/ui/components/NativeHeader";
 import { colorCheck } from '@/utils/colorCheck';
 import adjust from "@/utils/adjustColor";
 import i18n from "@/utils/i18n";
@@ -23,6 +25,7 @@ import { Grade } from "@/services/shared/grade";
 
 const SubjectInfo = () => {
   const { params } = useRoute();
+  const router = useRouter();
   const theme = useTheme();
   const colors = theme.colors;
 
@@ -89,6 +92,16 @@ const SubjectInfo = () => {
 
   return (
     <>
+      {Platform.OS === "android" && (
+        <NativeHeaderSide side="Left">
+          <NativeHeaderPressable onPress={() => router.back()}>
+            <Icon size={28}>
+              <Papicons name="Cross" />
+            </Icon>
+          </NativeHeaderPressable>
+        </NativeHeaderSide>
+      )}
+
       {Platform.OS !== "android" && (
         <LinearGradient
           colors={[subjectColor, colors.background]}
