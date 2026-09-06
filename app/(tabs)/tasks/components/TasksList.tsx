@@ -108,7 +108,7 @@ const TasksList: React.FC<TasksListProps> = ({
       animated
       numColumns={numColumns}
       maintainVisibleContentPosition={{ disabled: true }}
-      style={styles.list}
+      style={[styles.list, { backgroundColor: colors.overground }]}
       contentContainerStyle={{
         paddingHorizontal: 16,
         paddingBottom: 16,
@@ -123,11 +123,6 @@ const TasksList: React.FC<TasksListProps> = ({
         top: headerHeight - insets.top,
       }}
       ListEmptyComponent={<EmptyState isSearching={searchTerm.length > 0} />}
-      ListHeaderComponent={
-        searchTerm.trim().length === 0 ? (
-          <TasksSummary sections={sections} headerHeight={headerHeight} />
-        ) : null
-      }
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}

@@ -143,6 +143,12 @@ const renderListRow = ({
       {trailing && <View style={styles.trailing}>{trailing}</View>}
     </View>
   );
+  const separator =
+    Platform.OS === "ios" && !isLast ? (
+      <View style={[styles.separatorContainer, { backgroundColor: colors.item }]}>
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
+      </View>
+    ) : null;
   const touchable = (
     <ListTouchable {...(itemProps.onPress ? { onPress: itemProps.onPress } : {})}>
       {row}
@@ -161,14 +167,7 @@ const renderListRow = ({
           : {
               borderColor: colors.border,
               backgroundColor: colors.border,
-              borderLeftWidth: 1,
-              borderRightWidth: 1,
-              borderBottomWidth: 1,
-              borderTopWidth: isFirst ? 1 : 0,
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
+              borderWidth: 0,
               elevation: 1,
               overflow: "visible",
               ...itemProps.containerStyle,
@@ -185,6 +184,7 @@ const renderListRow = ({
       ) : (
         touchable
       )}
+      {separator}
     </ItemComponent>
   );
 };
@@ -569,7 +569,10 @@ const List = ({
     () => [rest.contentContainerStyle, styles.listContentContainer],
     [rest.contentContainerStyle]
   );
-  const listStyle = useMemo(() => [rest.style, styles.list], [rest.style]);
+  const listStyle = useMemo(
+    () => StyleSheet.flatten([rest.style, styles.list]),
+    [rest.style]
+  );
   const removeClippedSubviews =
     rest.removeClippedSubviews ?? Platform.OS === "android";
   const initialNumToRender = rest.initialNumToRender ?? 10;
@@ -694,6 +697,8 @@ const styles = StyleSheet.create({
   leading: { marginRight: 16 },
   body: { flex: 1 },
   trailing: { marginLeft: 16 },
+  separatorContainer: {},
+  separator: { height: 0.5, marginHorizontal: 16 },
   sectionTitleContainer: { paddingHorizontal: Platform.OS === "android" ? 16 : 4, paddingVertical: 6, paddingBottom: Platform.OS === "android" ? 6 : 4, flexDirection: "row", alignItems: "center", gap: Platform.OS === "android" ? 10 : 8, marginRight: 6 },
   first: {
     borderTopLeftRadius: 20,

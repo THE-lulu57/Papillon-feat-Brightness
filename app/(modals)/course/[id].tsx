@@ -76,7 +76,7 @@ export default function CourseModal() {
   const endTime = Math.floor(course.to.getTime() / 1000);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.overground }}>
       {Platform.OS === "android" && (
         <NativeHeaderSide side="Left">
           <NativeHeaderPressable onPress={() => router.back()}>

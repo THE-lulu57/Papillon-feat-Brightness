@@ -18,7 +18,7 @@ export default function Layout() {
     headerTransparent: runsIOS26,
     headerShadowVisible: false,
     ...androidHeaderProps,
-    headerBackVisible: true,
+    headerBackVisible: false,
   }), [screenOptions, androidHeaderProps]);
 
   return (

@@ -98,7 +98,7 @@ const Task = () => {
 
       {Platform.OS !== "android" && (
         <LinearGradient
-          colors={[subjectInfo.color, `${subjectInfo.color}00`]}
+          colors={[subjectInfo.color, theme.colors.overground]}
           style={{
             position: "absolute",
             top: 0,

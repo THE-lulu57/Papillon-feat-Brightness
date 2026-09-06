@@ -163,6 +163,7 @@ export default function AttendanceView() {
         />
 
         <List
+          style={{ flex: 1, backgroundColor: colors.overground }}
           contentContainerStyle={{
             padding: 16,
             paddingTop: headerHeight,
