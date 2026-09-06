@@ -712,7 +712,7 @@ export const initializeAccountManager = async (
   if (!accountId) {
     const lastUsedAccount = useAccountStore.getState().lastUsedAccount;
     if (!lastUsedAccount) {
-      error("No account ID provided and no last used account found.");
+      throw error("No account ID provided and no last used account found.");
     }
     accountId = lastUsedAccount;
   }
@@ -721,7 +721,7 @@ export const initializeAccountManager = async (
     .accounts.find(acc => acc.id === accountId);
 
   if (!account) {
-    error("Account not found for ID: " + accountId);
+    throw error("Account not found for ID: " + accountId);
   }
 
   const manager = new AccountManager(account);

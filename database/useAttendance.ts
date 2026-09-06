@@ -172,7 +172,7 @@ export async function getAttendanceFromCache(period: string): Promise<SharedAtte
       .fetch();
 
     if (!attendance[0]) {
-      throw new Error("Attendance not found");
+      return undefined;
     }
     const att = attendance[0];
     return {

@@ -91,7 +91,11 @@ const UserProfile = ({ subtitle, onPress }: { subtitle?: string, onPress?: () =>
                 disabledTabs: disabledTabsForAccount,
               });
               store.setLastUsedAccount(nativeEvent.event);
-              await initializeAccountManager();
+              try {
+                await initializeAccountManager();
+              } catch (err) {
+                console.error("Failed to switch account:", err);
+              }
             }}
             actions={[
               ...(Platform.OS === "ios" ? [{
