@@ -44,7 +44,7 @@ type GradesWidgetProps = {
 
 const GradesWidget = ({ period, onEmptyStateChange }: GradesWidgetProps) => {
   try {
-    const manager = getManager();
+    const [manager, setManager] = useState(() => getManager(true));
 
     const [subjects, setSubjects] = useState<SharedSubject[]>([]);
     const [currentPeriod, setCurrentPeriod] = useState<Period | undefined>(period);
@@ -127,6 +127,7 @@ const GradesWidget = ({ period, onEmptyStateChange }: GradesWidgetProps) => {
 
     useEffect(() => {
       const unsubscribe = subscribeManagerUpdate((updatedManager) => {
+        setManager(updatedManager);
         fetchPeriods(updatedManager);
       });
       return () => unsubscribe();

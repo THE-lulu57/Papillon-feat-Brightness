@@ -742,8 +742,8 @@ export const initializeAccountManager = async (
   return manager;
 };
 
-export const getManager = (): AccountManager => {
-  if (!globalManager) {
+export const getManager = (silent = false): AccountManager => {
+  if (!globalManager && !silent) {
     warn(
       "Account manager not initialized. Call initializeAccountManager first."
     );

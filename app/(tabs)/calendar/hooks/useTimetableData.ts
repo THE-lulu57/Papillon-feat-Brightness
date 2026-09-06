@@ -13,14 +13,7 @@ export function useTimetableData(weekNumber: number, currentDate: Date = new Dat
   const [fetchedWeeks, setFetchedWeeks] = useState<string[]>([]);
   const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  let manager: ReturnType<typeof getManager> | null;
-
-  try {
-    manager = getManager();
-  } catch (error) {
-    warn('Manager not initialized, iCal events will still work');
-    manager = null;
-  }
+  const [manager, setManager] = useState(() => getManager(true));
 
   const store = useAccountStore.getState();
   const account = store.accounts.find(account => store.lastUsedAccount);
@@ -94,6 +87,7 @@ export function useTimetableData(weekNumber: number, currentDate: Date = new Dat
   useEffect(() => {
     const unsubscribe = subscribeManagerUpdate((updatedManager) => {
       if (updatedManager) {
+        setManager(updatedManager);
         fetchWeeklyTimetable(weekNumber);
       }
     });

@@ -104,7 +104,7 @@ const GradesView: React.FC = () => {
   ];
 
   // Manager
-  const manager = getManager();
+  const [manager, setManager] = useState(() => getManager(true));
 
   // Obtention des périodes
   const [periods, setPeriods] = useState<Period[]>([]);
@@ -143,6 +143,7 @@ const GradesView: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeManagerUpdate((updatedManager) => {
+      setManager(updatedManager);
       fetchPeriods(updatedManager);
     });
 
