@@ -445,7 +445,34 @@ const List = ({
           return normalized;
         });
 
-        output.push(...normalizedSectionEntries);
+        const entries = normalizedSectionEntries.map((entry, entryIndex) => {
+          if (entry.kind === "sectionTitle") {
+            return {
+              ...entry,
+              gapBefore: entryIndex === 0 ? 0 : gap,
+            };
+          }
+
+          if (entry.kind === "view") {
+            return { ...entry, gapBefore: 0 };
+          }
+
+          const previous = normalizedSectionEntries[entryIndex - 1];
+          if (
+            entry.isFirstInSection &&
+            previous?.kind === "sectionTitle"
+          ) {
+            return { ...entry, gapBefore: 6 };
+          }
+
+          return { ...entry, gapBefore: 0 };
+        });
+
+        output.push({
+          kind: "section",
+          id: sectionId,
+          entries,
+        });
         return;
       }
 
@@ -493,6 +520,10 @@ const List = ({
         return { ...entry, gapBefore: 0 };
       }
 
+      if (entry.kind === "section") {
+        return { ...entry, gapBefore: gap };
+      }
+
       if (entry.isFirstInSection && previous.kind === "sectionTitle") {
         if (previous.sectionId === entry.sectionId) {
           return { ...entry, gapBefore: 6 };
@@ -514,53 +545,69 @@ const List = ({
 
   const renderItem = useCallback(
     ({ item }) => {
-      if (item.kind === "sectionTitle") {
+      const renderEntry = entry => {
+        if (entry.kind === "sectionTitle") {
+          return (
+            <View
+              style={[
+                styles.sectionTitleContainer,
+                { marginTop: entry.gapBefore },
+              ]}
+            >
+              {entry.main}
+              {entry.label && (
+                <Typography
+                  variant="body1"
+                  weight="semibold"
+                  color="textSecondary"
+                >
+                  {entry.label}
+                </Typography>
+              )}
+            </View>
+          );
+        }
+
+        if (entry.kind === "view") {
+          return <View style={entry.viewProps.style}>{entry.main}</View>;
+        }
+
+        if (entry.kind === "raw") {
+          return (
+            <MemoizedRawRuntimeRenderer
+              item={entry}
+              animated={animated}
+              colors={colors}
+            />
+          );
+        }
+
+        return renderListRow({
+          itemProps: entry.itemProps,
+          leading: entry.leading,
+          trailing: entry.trailing,
+          main: entry.main,
+          isFirst: entry.isFirstInSection,
+          isLast: entry.isLastInSection,
+          gapBefore: entry.gapBefore,
+          listAnimated: animated,
+          colors,
+        });
+      };
+
+      if (item.kind === "section") {
         return (
-          <View
-            style={[
-              styles.sectionTitleContainer,
-              { marginTop: item.gapBefore },
-            ]}
-          >
-            {item.main}
-            {item.label && (
-              <Typography
-                variant="body1"
-                weight="semibold"
-                color="textSecondary"
-              >
-                {item.label}
-              </Typography>
-            )}
+          <View style={{ marginTop: item.gapBefore }}>
+            {item.entries.map(entry => (
+              <React.Fragment key={entry.id}>
+                {renderEntry(entry)}
+              </React.Fragment>
+            ))}
           </View>
         );
       }
 
-      if (item.kind === "view") {
-        return <View style={item.viewProps.style}>{item.main}</View>;
-      }
-
-      if (item.kind === "raw") {
-        return (
-          <MemoizedRawRuntimeRenderer
-            item={item}
-            animated={animated}
-            colors={colors}
-          />
-        );
-      }
-
-      return renderListRow({
-        itemProps: item.itemProps,
-        leading: item.leading,
-        trailing: item.trailing,
-        main: item.main,
-        isFirst: item.isFirstInSection,
-        isLast: item.isLastInSection,
-        gapBefore: item.gapBefore,
-        listAnimated: animated,
-        colors,
-      });
+      return renderEntry(item);
     },
     [animated, colors]
   );
@@ -598,7 +645,7 @@ const List = ({
         <View
           style={[
             numColumns > 1 && {
-              paddingLeft: item.index > 0 ? gap / 2 : 0,
+              paddingLeft: item.index % numColumns > 0 ? gap / 2 : 0,
               paddingRight: item.index % numColumns < numColumns - 1 ? gap / 2 : 0,
             },
           ]}

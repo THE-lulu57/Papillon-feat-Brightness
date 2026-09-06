@@ -19,7 +19,7 @@ import { getSubjectColor } from "@/utils/subjects/colors";
 import { getSubjectEmoji } from "@/utils/subjects/emoji";
 import { getSubjectName } from "@/utils/subjects/name";
 import { Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import List from "@/ui/new/List";
 import Typography from "@/ui/new/Typography";
 import { Homework } from "@/services/shared/homework";
@@ -112,6 +112,7 @@ const Task = () => {
         />
       )}
 
+<SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
       <List
         contentInsetAdjustmentBehavior="automatic"
         ListHeaderComponent={
@@ -210,6 +211,7 @@ const Task = () => {
           </List.Section>
         )}
       </List>
+      </SafeAreaView>
     </>
   );
 };
