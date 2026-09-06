@@ -5,7 +5,7 @@ import { t } from 'i18next';
 import React from 'react';
 import { FlatList, Platform, StatusBar, View } from 'react-native';
 import Reanimated, { LinearTransition } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAccountStore } from '@/stores/account';
 import { useSettingsStore } from '@/stores/settings';
@@ -118,14 +118,13 @@ const HomeScreen = () => {
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingBottom: Platform.OS === 'ios' ? bottomTabBarHeight : 16,
-            paddingHorizontal: 16,
             flexGrow: 1,
             gap: 12,
             marginTop: 6,
-            paddingLeft: insets.left + 16,
             width: '100%',
-            maxWidth: 670,
+            maxWidth: 700,
             marginHorizontal: 'auto',
+            paddingHorizontal: 16,
           }}
           data={data}
           ListFooterComponent={allWidgetsHidden ? <HomeEmptyState /> : null}
@@ -169,7 +168,9 @@ const HomeViewContainer = ({ children }) => {
       }
       style={{ flex: 1 }}
     >
+      <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
       {children}
+      </SafeAreaView>
     </MaskedView>
   )
 }

@@ -113,10 +113,7 @@ const TasksList: React.FC<TasksListProps> = ({
         paddingHorizontal: 16,
         paddingBottom: 16,
         paddingTop:
-          searchTerm.trim().length === 0 && visibleSections.length !== 0
-            ? 0
-            : headerHeight +
-              (Platform.OS === "android" ? 10 : -insets.top + 10),
+          headerHeight + (Platform.OS === "android" ? 10 : -insets.top + 10),
         paddingLeft: insets.left + 16,
       }}
       scrollIndicatorInsets={{
