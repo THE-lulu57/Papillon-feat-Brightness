@@ -44,26 +44,22 @@ export class DatabaseInitializer {
   private async forceResetDatabaseQueue(db: Database): Promise<void> {
     try {
       debug("🍉 Force resetting database queue...");
-      
-      for (let i = 0; i < 3; i++) {
-        const resetPromise = db.write(async () => {
-          // Empty write operation to flush the queue
-        });
 
-        await Promise.race([
-          resetPromise,
-          new Promise<void>((_, reject) => {
-            setTimeout(() => {
-              reject(new Error(`Queue reset ${i + 1} timeout`));
-            }, 3000);
-          })
-        ]);
+      const resetPromise = db.write(async () => {
+        // Empty write operation to flush the queue
+      });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+      await Promise.race([
+        resetPromise,
+        new Promise<void>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Queue reset timeout"));
+          }, 3000);
+        })
+      ]);
 
       debug("🍉 Database queue reset completed");
-      
+
     } catch (err) {
       warn(`Database queue reset failed: ${err}`);
       warn("🍉 Database may start with degraded performance");
@@ -74,7 +70,7 @@ export class DatabaseInitializer {
     try {
       const startTime = Date.now();
       
-      const testPromise = db.collections.get('news').query().fetch();
+      const testPromise = db.collections.get('news').query().fetchCount();
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
           reject(new Error("Database health check timeout"));
