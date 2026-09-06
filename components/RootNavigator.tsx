@@ -5,7 +5,6 @@ import React, { useMemo } from 'react';
 import { Platform, StatusBar, View } from 'react-native';
 
 import {
-  AI_SCREEN_OPTIONS,
   ALERT_SCREEN_OPTIONS,
   CHANGELOG_SCREEN_OPTIONS,
   CONSENT_SCREEN_OPTIONS,
@@ -60,15 +59,9 @@ function RootNavigatorContent() {
           name="(settings)"
           options={{ headerShown: false, presentation: "formSheet" }}
         />
-        <Stack.Screen
-          name="(modals)"
-          options={{ headerShown: false, presentation: "formSheet" }}
-        />
-        <Stack.Screen name="page" />
         <Stack.Screen name="demo" options={DEMO_SCREEN_OPTIONS} />
         <Stack.Screen name="consent" options={CONSENT_SCREEN_OPTIONS} />
         <Stack.Screen name="changelog" options={CHANGELOG_SCREEN_OPTIONS} />
-        <Stack.Screen name="ai" options={AI_SCREEN_OPTIONS} />
         <Stack.Screen name="devmode" options={DEVMODE_SCREEN_OPTIONS} />
         <Stack.Screen
           name="(dev)/requests"

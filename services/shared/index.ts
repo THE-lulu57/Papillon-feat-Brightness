@@ -58,7 +58,7 @@ import {
 } from "@/services/shared/types";
 import { useAccountStore } from "@/stores/account";
 import { Account, ServiceAccount, Services } from "@/stores/account/types";
-import { error, log, warn } from "@/utils/logger/logger";
+import { debug, error, log, warn } from "@/utils/logger/logger";
 
 import {
   AccessDeniedError,
@@ -97,14 +97,14 @@ export class AccountManager {
   }
 
   async refreshAllAccounts(): Promise<boolean> {
-    log("We're refreshing all services for the account " + this.account.id);
+    debug("We're refreshing all services for the account " + this.account.id);
     const hasInternet = await this.hasInternet();
 
     let refreshedAtLeastOne = false;
 
     for (const service of this.account.services) {
       try {
-        log("Trying to refresh " + service.id);
+        debug("Trying to refresh " + service.id);
         const plugin = this.getServicePluginForAccount(service);
 
         if (!hasInternet && plugin.requiresInternet !== false) {
@@ -115,10 +115,10 @@ export class AccountManager {
         if (plugin?.capabilities.includes(Capabilities.REFRESH)) {
           this.clients[service.id] = await plugin.refreshAccount(service.auth);
           refreshedAtLeastOne = true;
-          log("Successfully refreshed " + service.id);
+          debug("Successfully refreshed " + service.id);
         } else {
           this.clients[service.id] = plugin;
-          log(
+          debug(
             "Plugin for " +
               service.id +
               " doesn't support refresh but is available for other capabilities"
@@ -132,7 +132,7 @@ export class AccountManager {
       }
     }
 
-    log(
+    debug(
       "Finished refreshing process for all services, services refreshed: " +
         Object.keys(this.clients).length
     );

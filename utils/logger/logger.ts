@@ -52,6 +52,22 @@ function log(message: string, from?: string): void {
   console.log(entry);
 }
 
+// Verbose, routine "step completed" narration (e.g. model updater progress,
+// database queue housekeeping). Always recorded to the in-app log viewer, but
+// only echoed to the console when explicitly opted into, so normal startup
+// output stays focused on things that need attention.
+const VERBOSE_LOGS_ENABLED = process.env.EXPO_PUBLIC_VERBOSE_LOGS === "1";
+
+function debug(message: string, from?: string): void {
+  const date = getIsoDate()
+  const functionName = obtainFunctionName(from)
+  saveLog(date, message, LogType.LOG, functionName);
+  if (VERBOSE_LOGS_ENABLED) {
+    const entry = getMessage(0, date, functionName, message);
+    console.log(entry);
+  }
+}
+
 // Native connectivity failures (no signal, DNS down, TLS/SSL failure, timeout, etc).
 // These aren't application bugs, so they're kept in local logs but not reported to PostHog.
 const NETWORK_ERROR_PATTERN = /fetch failed: UnexpectedException/i;
@@ -87,4 +103,4 @@ function info(message: string, from?: string): void {
   console.info(entry);
 }
 
-export { error, info, log, warn };
+export { debug, error, info, log, warn };

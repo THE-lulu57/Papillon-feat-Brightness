@@ -1,6 +1,6 @@
 import { Database } from "@nozbe/watermelondb";
 
-import { error,info, warn } from "@/utils/logger/logger";
+import { debug, error, warn } from "@/utils/logger/logger";
 
 import { getDatabaseInstance } from "../DatabaseProvider";
 
@@ -33,7 +33,7 @@ export class DatabaseInitializer {
       }
 
       this.isInitialized = true;
-      info("🍉 Database initialization completed successfully");
+      debug("🍉 Database initialization completed successfully");
 
     } catch (err) {
       error(`Database initialization failed: ${err}`);
@@ -43,7 +43,7 @@ export class DatabaseInitializer {
 
   private async forceResetDatabaseQueue(db: Database): Promise<void> {
     try {
-      info("🍉 Force resetting database queue...");
+      debug("🍉 Force resetting database queue...");
       
       for (let i = 0; i < 3; i++) {
         const resetPromise = db.write(async () => {
@@ -62,7 +62,7 @@ export class DatabaseInitializer {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      info("🍉 Database queue reset completed");
+      debug("🍉 Database queue reset completed");
       
     } catch (err) {
       warn(`Database queue reset failed: ${err}`);
@@ -84,7 +84,7 @@ export class DatabaseInitializer {
       await Promise.race([testPromise, timeoutPromise]);
 
       const duration = Date.now() - startTime;
-      info(`🍉 Database health check passed (${duration}ms)`);
+      debug(`🍉 Database health check passed (${duration}ms)`);
       
       return duration < 3000; // Consider healthy if under 3 seconds
       
