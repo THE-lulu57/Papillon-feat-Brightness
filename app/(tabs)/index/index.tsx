@@ -4,11 +4,13 @@ import { useRouter } from 'expo-router';
 import { t } from 'i18next';
 import React from 'react';
 import { FlatList, Platform, StatusBar, View } from 'react-native';
+import Reanimated, { LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAccountStore } from '@/stores/account';
 import { useSettingsStore } from '@/stores/settings';
 import { checkConsent } from '@/utils/logger/consent';
+import { Animation } from '@/ui/utils/Animation';
 
 import HomeHeader from './atoms/HomeHeader';
 import HomeTopBar from './atoms/HomeTopBar';
@@ -72,6 +74,7 @@ const HomeScreen = () => {
       icon: <Papicons name={"Calendar"} />,
       title: timetableTitle,
       redirect: "(tabs)/calendar",
+      hidden: courses.length === 0,
       render: renderTimeTable
     },
     {
@@ -81,7 +84,7 @@ const HomeScreen = () => {
       hidden: gradesWidgetHidden,
       render: renderGrades
     }
-  ], [renderTimeTable, renderGrades, gradesWidgetHidden, timetableTitle]);
+  ], [renderTimeTable, renderGrades, gradesWidgetHidden, timetableTitle, courses.length]);
 
   React.useEffect(() => {
     if (!account || welcomeModalSeen) {
@@ -99,7 +102,11 @@ const HomeScreen = () => {
       {focused && <StatusBar translucent animated barStyle={'light-content'} />}
       <HomeViewContainer key={"home"}>
         <FlatList
-          renderItem={({ item }) => <HomeWidget item={item} />}
+          renderItem={({ item }) => (
+            <Reanimated.View layout={Animation(LinearTransition, "list")}>
+              <HomeWidget item={item} />
+            </Reanimated.View>
+          )}
           keyExtractor={(item) => item.title}
           ListHeaderComponent={<HomeHeader />}
           style={{ flex: 1 }}

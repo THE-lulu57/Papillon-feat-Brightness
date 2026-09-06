@@ -7,8 +7,11 @@ import { Papicons } from '@getpapillon/papicons';
 import { Link } from 'expo-router';
 import { useTheme } from "expo-router/react-navigation";
 import { Platform } from "react-native";
+import { LinearTransition } from "react-native-reanimated";
 import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
 import { ListTouchable } from '@/ui/new/List';
+import { Animation } from '@/ui/utils/Animation';
+import { PapillonAppearIn, PapillonAppearOut } from '@/ui/utils/Transition';
 
 export interface HomeWidgetItem {
   icon: React.ReactNode;
@@ -28,7 +31,7 @@ interface HomeWidgetProps {
 const HomeWidgetContent: React.FC<HomeWidgetProps> = ({ item }) => {
   const theme = useTheme();
 
-  if (!item || (item.dev && !__DEV__)) {
+  if (!item || (item.dev && !__DEV__) || item.hidden) {
     return null;
   }
 
@@ -37,7 +40,10 @@ const HomeWidgetContent: React.FC<HomeWidgetProps> = ({ item }) => {
       card
       radius={25}
       gap={0}
-      style={{ elevation: 2, display: item.hidden ? "none" : "flex", flex: 1 }}
+      entering={PapillonAppearIn}
+      exiting={PapillonAppearOut}
+      layout={Animation(LinearTransition, "list")}
+      style={{ elevation: 2, flex: 1 }}
       backgroundColor={
         Platform.OS === "ios"
           ? theme.colors.card
