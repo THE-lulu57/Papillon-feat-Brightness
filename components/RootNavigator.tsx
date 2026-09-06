@@ -162,6 +162,20 @@ function RootNavigatorContent() {
         />
 
         <Stack.Screen
+          name="(modals)/team"
+          options={{
+            headerShown: Platform.OS !== "ios",
+            presentation: Platform.select({
+              ios: "formSheet",
+              default: "modal",
+            }),
+            sheetGrabberVisible: true,
+            sheetAllowedDetents: "fitToContents",
+            ...androidHeaderProps,
+          }}
+        />
+
+        <Stack.Screen
           name="(features)/soon"
           options={{
             headerShown: Platform.OS !== "ios",

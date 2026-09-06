@@ -22,6 +22,7 @@ export interface HomeWidgetItem {
   render?: () => React.ReactNode;
   dev?: boolean;
   hidden?: boolean;
+  onDismiss?: () => void;
 }
 
 interface HomeWidgetProps {
@@ -71,6 +72,21 @@ const HomeWidgetContent: React.FC<HomeWidgetProps> = ({ item }) => {
         >
           {item.title}
         </Typography>
+        {item.onDismiss && (
+          <ListTouchable hitSlop={10} onPress={item.onDismiss}>
+            <Stack
+              hAlign="center"
+              vAlign="center"
+              backgroundColor={theme.colors.text + "11"}
+              radius={16}
+              style={{ width: 32, height: 32 }}
+            >
+              <Icon size={16} papicon opacity={0.5}>
+                <Papicons name="Cross" />
+              </Icon>
+            </Stack>
+          </ListTouchable>
+        )}
         {(item.redirect || item.onPress) && (
           <Stack
             bordered={Platform.OS === "ios"}
