@@ -131,6 +131,9 @@
     "typescript": "~6.0.3"
   },
   "private": true,
+  "overrides": {
+    "react-native-screens": "^4.27.0"
+  },
   "reanimated": {
     "staticFeatureFlags": {
       "ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS": true,
