@@ -21,7 +21,7 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
       - name: Install JS dependencies
-        run: npm install --legacy-peer-deps || true
+        run: npm install
         
       - name: Expo prebuild iOS
         run: npx expo prebuild --platform ios --clean
