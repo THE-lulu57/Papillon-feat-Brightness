@@ -29,7 +29,7 @@ export default function CardView() {
       if (service.serviceId === Services.ECOLEDIRECTE) {
         return isSelfModuleEnabledED(service.additionals);
       }
-      return [Services.TURBOSELF, Services.ARD, Services.IZLY].includes(service.serviceId);
+      return [Services.TURBOSELF, Services.ARD, Services.IZLY, Services.CUSTOM_CANTEEN].includes(service.serviceId);
     },
   );
 

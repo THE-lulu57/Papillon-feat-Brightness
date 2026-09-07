@@ -23,6 +23,7 @@ import Course from '@/database/models/Timetable';
 
 import { Balance } from './models/Balance';
 import CanteenHistoryItem from './models/CanteenHistory';
+import CustomCanteenCard from './models/CustomCanteenCard';
 import Kid from './models/Kid';
 import { mySchema } from './schema';
 
@@ -73,6 +74,7 @@ export const database = new Database({
     Course,
     Kid,
     Balance,
-    CanteenHistoryItem
+    CanteenHistoryItem,
+    CustomCanteenCard
   ],
 });

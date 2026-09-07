@@ -32,7 +32,15 @@ export interface CanteenHistoryItem extends GenericInterface {
 
 export interface QRCode extends GenericInterface {
 	type: QRType,
-	data: string
+	data: string,
+	/**
+	 * Concrete render format for this specific code instance (e.g. "QR", "CODE39", "EAN13").
+	 * Optional: services with a single, fixed format per service (ED, Izly...) can omit it and
+	 * rely on the legacy static `getCodeType(service)` lookup. Services that can produce a
+	 * different format per account (e.g. a user-scanned custom card) MUST set it, since a single
+	 * `Services` enum value can no longer imply a single format.
+	 */
+	format?: string
 }
 
 export enum QRType {

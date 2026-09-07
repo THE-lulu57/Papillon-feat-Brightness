@@ -28,6 +28,7 @@ import { Auth, Services } from "@/stores/account/types";
 
 import { Alise } from "../alise";
 import { ARD } from "../ard";
+import { CustomCanteen } from "../custom-canteen";
 import { EcoleDirecte } from "../ecoledirecte";
 import { Izly } from "../izly";
 import { Multi } from "../multi";
@@ -62,7 +63,7 @@ export interface SchoolServicePlugin {
 
   refreshAccount: (
     credentials: Auth
-  ) => Promise<Pronote | Skolengo | EcoleDirecte | Multi | TurboSelf | ARD | Izly | Alise | Appscho | MockData>;
+  ) => Promise<Pronote | Skolengo | EcoleDirecte | Multi | TurboSelf | ARD | Izly | Alise | Appscho | MockData | CustomCanteen>;
   getKids?: () => Kid[];
   getCanteenKind?: () => CanteenKind;
   getHomeworks?: (weekNumber: number) => Promise<Homework[]>;

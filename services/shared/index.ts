@@ -686,6 +686,12 @@ export class AccountManager {
       return new module.MockData(service.id);
     }
 
+    if (service.serviceId === Services.CUSTOM_CANTEEN) {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const module = require("@/services/custom-canteen/index");
+      return new module.CustomCanteen(service.id);
+    }
+
     error(
       "We're not able to find a plugin for service: " +
         service.serviceId +

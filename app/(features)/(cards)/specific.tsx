@@ -52,6 +52,7 @@ export default function QRCodeAndCardsPage() {
 
   const [history, setHistory] = useState<CanteenHistoryItem[]>([]);
   const [qrcode, setQR] = useState("");
+  const [qrFormat, setQRFormat] = useState<string | undefined>(undefined);
   const [accountKind, setAccountKind] = useState<CanteenKind>(CanteenKind.ARGENT)
   const [date, setDate] = useState(new Date());
   const [weekNumber, setWeekNumber] = useState(getWeekNumberFromDate(date));
@@ -70,8 +71,9 @@ export default function QRCodeAndCardsPage() {
 
   const fetchQRCode = useCallback(async () => {
     try {
-      const { data } = await manager.getCanteenQRCodes(wallet.createdByAccount);
+      const { data, format } = await manager.getCanteenQRCodes(wallet.createdByAccount);
       setQR(data);
+      setQRFormat(format);
     } catch (error) {
       warn(String(error));
     }
@@ -195,7 +197,7 @@ export default function QRCodeAndCardsPage() {
 
           {qrcode && (
             <AnimatedPressable
-              onPress={() => router.push({ pathname: "/(features)/(cards)/qrcode", params: { qrcode, type: getCodeType(service), service } })}
+              onPress={() => router.push({ pathname: "/(features)/(cards)/qrcode", params: { qrcode, type: qrFormat ?? getCodeType(service), service } })}
               style={{
                 width: "100%",
                 backgroundColor: colors.background,

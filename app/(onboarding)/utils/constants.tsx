@@ -312,6 +312,16 @@ export function GetSupportedRestaurants(redirect: (path: { pathname: string }) =
       onPress: () => {
         redirect({ pathname: '/(onboarding)/restaurants/alise' });
       }
+    },
+    {
+      name: "custom",
+      title: t("ONBOARDING_SERVICE_CUSTOM_CANTEEN"),
+      hasLimitedSupport: false,
+      image: require("@/assets/images/icon.png"),
+      type: "main",
+      onPress: () => {
+        redirect({ pathname: '/(onboarding)/restaurants/custom' });
+      }
     }
   ]
 }

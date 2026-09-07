@@ -14,6 +14,8 @@ export function getServiceName(service: Services): string {
     return "Izly";
   case Services.ALISE:
     return "Alise";
+  case Services.CUSTOM_CANTEEN:
+    return "Carte personnalisée";
   case Services.ECOLEDIRECTE:
     return "ÉcoleDirecte";
   default:
@@ -39,6 +41,8 @@ export function getServiceLogo(service: Services): ImageSourcePropType {
     return require("@/assets/images/ecoledirecte.png")
   case Services.ALISE:
     return require("@/assets/images/alise.jpg")
+  case Services.CUSTOM_CANTEEN:
+    return require("@/assets/images/icon.png")
   default: 
     return require("@/assets/images/turboself.png")
   }
@@ -56,6 +60,8 @@ export function getServiceBackground(service: Services): ImageSourcePropType {
     return require("@/assets/images/card_background/ecoledirecte.png")
   case Services.ALISE:
     return require("@/assets/images/alise_background_card.png")
+  case Services.CUSTOM_CANTEEN:
+    return require("@/assets/images/custom_canteen_background_card.png")
   default: 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("@/assets/images/ard_background_card.png")
@@ -72,6 +78,8 @@ export function getServiceColor(service: Services): string {
     return "#108ED1"
   case Services.ALISE:
     return "#108ED1"
+  case Services.CUSTOM_CANTEEN:
+    return "#3A3F4B"
   default:
     return "#E70026"
   }
