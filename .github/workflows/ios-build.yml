@@ -1,5 +1,4 @@
-
-name: iOS Build (Unsigned IPA)
+name: iOS Build
 
 on:
   workflow_dispatch:
@@ -9,20 +8,21 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          echo "$HOME/.bun/bin" >> $GITHUB_PATH
-      - name: Install JS dependencies
-        run: npm install
-        
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Check Expo dependencies
+        run: npx expo install --check
+
       - name: Expo prebuild iOS
         run: npx expo prebuild --platform ios --clean
 
@@ -30,7 +30,8 @@ jobs:
         run: |
           cd ios
           pod install
-      - name: Archive iOS app (unsigned)
+
+      - name: Archive iOS app
         run: |
           cd ios
           xcodebuild archive \
@@ -41,15 +42,16 @@ jobs:
             -destination 'generic/platform=iOS' \
             -archivePath build/Papillon.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM= \
             SKIP_INSTALL=NO
+
       - name: Create IPA
         run: |
           cd ios/build
-          mkdir Payload
+          mkdir -p Payload
           cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
           zip -r Papillon.ipa Payload
-      - name: Upload IPA artifact
+
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: Papillon.ipa
