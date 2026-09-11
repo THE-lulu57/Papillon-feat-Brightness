@@ -54,7 +54,7 @@ jobs:
         run: |
           xcodebuild \
             -workspace ios/Papillon.xcworkspace \
-            -scheme "Papillon (release)" \
+            -scheme "Papillon" \
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
