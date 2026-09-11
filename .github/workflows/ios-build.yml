@@ -1,0 +1,83 @@
+```yaml
+name: Build Papillon iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ios:
+    name: Build iOS
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Show environment
+        run: |
+          node --version
+          npm --version
+          xcodebuild -version
+          sw_vers
+
+      - name: Install JavaScript dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Prebuild Expo
+        run: npx expo prebuild
+
+      - name: Install CocoaPods
+        run: |
+          brew install cocoapods || true
+          pod --version
+
+      - name: Install iOS dependencies
+        working-directory: ios
+        run: pod install
+
+      - name: Build Papillon Release
+        run: |
+          xcodebuild \
+            -workspace ios/Papillon.xcworkspace \
+            -scheme "Papillon (release)" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath "$PWD/build/Papillon.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            archive
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+
+          cp -R \
+            build/Papillon.xcarchive/Products/Applications/Papillon.app \
+            Payload/Papillon.app
+
+          zip -r Papillon-unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Papillon-iOS
+          path: Papillon-unsigned.ipa
+          retention-days: 7
+
+      - name: Upload Xcode archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Papillon-xcarchive
+          path: build/Papillon.xcarchive
+          retention-days: 7
+```
