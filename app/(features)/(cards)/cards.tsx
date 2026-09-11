@@ -15,6 +15,7 @@ import {
   getServiceBackground,
   getServiceLogo,
   getServiceName,
+  getCodeType,
 } from "@/utils/services/helper";
 import { Plus } from "@getpapillon/papicons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -169,16 +170,23 @@ export function Card({
 
   return (
     <Pressable
-      onPress={() => {
+      onPress={async () => {
         if (!disabled) {
-          router.push({
-            pathname: "/(features)/(cards)/specific",
-            params: {
-              serviceName: getServiceName(service),
-              service: service,
-              wallet: JSON.stringify(wallet),
-            },
-          });
+          try {
+            const manager = getManager();
+            const { data: qrcode } = await manager.getCanteenQRCodes(wallet.createdByAccount);
+
+            router.push({
+              pathname: "/(features)/(cards)/qrcode",
+              params: {
+                qrcode,
+                type: getCodeType(service),
+                service,
+              },
+            });
+          } catch (error) {
+            console.error("Impossible de récupérer le QR code :", error);
+          }
         }
       }}
       onPressIn={() => setPressed(true)}
@@ -266,14 +274,6 @@ export function Card({
               style={{ width: "100%", lineHeight: 0 }}
             >
               {wallet.label}
-            </Typography>
-            <Typography
-              variant="title"
-              align="right"
-              color={"#FFFFFF"}
-              style={{ width: "100%", lineHeight: 0 }}
-            >
-              {(wallet.amount / 100).toFixed(2)} {wallet.currency}
             </Typography>
           </Stack>
         </Stack>
