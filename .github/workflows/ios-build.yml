@@ -28,6 +28,12 @@ jobs:
           xcodebuild -version
           sw_vers
 
+      - name: List Xcode schemes
+        run: |
+          xcodebuild \
+            -workspace ios/Papillon.xcworkspace \
+            -list
+
       - name: Install JavaScript dependencies
         run: npm install --legacy-peer-deps
 
