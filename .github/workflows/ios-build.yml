@@ -29,13 +29,24 @@ jobs:
           sw_vers
 
       - name: Install JavaScript dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Show Expo / React Native versions
         run: |
-          rm -rf node_modules
-          npm ci --legacy-peer-deps
+          echo "Expo:"
+          node -p "require('./node_modules/expo/package.json').version"
+
+          echo "React Native:"
+          node -p "require('./node_modules/react-native/package.json').version"
+
+          echo "Hermes:"
+          node -p "require('./node_modules/react-native/package.json').version"
+
+      - name: Expo Doctor
+        run: npx expo-doctor || true
 
       - name: Prebuild Expo
-        run: |
-          npx expo prebuild
+        run: npx expo prebuild --clean
 
       - name: Install CocoaPods
         run: |
@@ -46,7 +57,6 @@ jobs:
         working-directory: ios
         run: pod install
 
-      
       - name: List Xcode schemes
         run: |
           xcodebuild \
@@ -66,15 +76,35 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             archive
 
+      - name: Verify generated app
+        run: |
+          echo "Checking app..."
+
+          ls -lah build/Papillon.xcarchive/Products/Applications/
+
+          echo "Bundle:"
+          find build/Papillon.xcarchive/Products/Applications/Papillon.app \
+            -maxdepth 1 -type f | head -30
+
+          echo "Frameworks:"
+          ls -lah build/Papillon.xcarchive/Products/Applications/Papillon.app/Frameworks || true
+
+          echo "JS bundle:"
+          find build/Papillon.xcarchive/Products/Applications/Papillon.app \
+            -type f \
+            \( -name "*.jsbundle" -o -name "*.hbc" \) \
+            -print
+
       - name: Package unsigned IPA
         run: |
+          rm -rf Payload Papillon-unsigned.ipa
           mkdir -p Payload
 
           cp -R \
             build/Papillon.xcarchive/Products/Applications/Papillon.app \
             Payload/Papillon.app
 
-          zip -r Papillon-unsigned.ipa Payload
+          zip -r -q Papillon-unsigned.ipa Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
