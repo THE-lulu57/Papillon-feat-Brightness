@@ -29,10 +29,13 @@ jobs:
           sw_vers
 
       - name: Install JavaScript dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          rm -rf node_modules
+          npm ci --legacy-peer-deps
 
       - name: Prebuild Expo
-        run: npx expo prebuild
+        run: |
+          npx expo prebuild
 
       - name: Install CocoaPods
         run: |
