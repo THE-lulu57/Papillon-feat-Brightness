@@ -2,6 +2,7 @@ import PackageJSON from "./package.json" with { type: "json" };
 
 // versionCode: seconds since 2020-01-01 UTC — unique, strictly increasing, well under the 2.1e9 cap
 const androidVersionCode = Math.floor(Date.now() / 1000) - 1577836800;
+const isSideload = process.env.SIDELOAD_BUILD === "1";
 
 export default {
   expo: {
