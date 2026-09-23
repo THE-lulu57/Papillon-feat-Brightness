@@ -1,4 +1,3 @@
-
 name: iOS Build (Unsigned IPA)
 
 on:
@@ -6,51 +5,75 @@ on:
 
 jobs:
   ios:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install Bun
+      - name: Verify PapillonKit
         run: |
-          curl -fsSL https://bun.sh/install | bash
-          echo "$HOME/.bun/bin" >> $GITHUB_PATH
-      - name: Install JS dependencies
-        run: npm install --legacy-peer-deps || true
-        
+          echo "Current directory:"
+          pwd
+
+          echo "Checking PapillonKit:"
+          ls -lah PapillonKit/
+
+          test -f PapillonKit/papillonkit-1.0.0.tgz
+
+      - name: Install dependencies
+        run: |
+          npm install --legacy-peer-deps
+
+      - name: Check Expo
+        run: |
+          npx expo --version
+          node -p "require('./node_modules/expo/package.json').version"
+
       - name: Expo prebuild iOS
-        run: npx expo prebuild --platform ios --clean
+        run: |
+          npx expo prebuild --platform ios --clean
 
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
-      - name: Archive iOS app (unsigned)
+
+      - name: Show Xcode information
         run: |
-          cd ios
+          xcodebuild -version
+          xcodebuild -workspace ios/Papillon.xcworkspace -list
+
+      - name: Archive iOS app
+        run: |
           xcodebuild archive \
-            -workspace Papillon.xcworkspace \
+            -workspace ios/Papillon.xcworkspace \
             -scheme Papillon \
             -sdk iphoneos \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/Papillon.xcarchive \
+            -archivePath ios/build/Papillon.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM= \
+            CODE_SIGNING_REQUIRED=NO \
             SKIP_INSTALL=NO
+
       - name: Create IPA
         run: |
+          mkdir -p ios/build/Payload
+          cp -R ios/build/Papillon.xcarchive/Products/Applications/Papillon.app \
+                ios/build/Payload/
+
           cd ios/build
-          mkdir Payload
-          cp -R Papillon.xcarchive/Products/Applications/Papillon.app Payload/
           zip -r Papillon.ipa Payload
-      - name: Upload IPA artifact
+
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Papillon.ipa
+          name: Papillon-unsigned-IPA
           path: ios/build/Papillon.ipa
