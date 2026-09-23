@@ -15,21 +15,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-
-      - name: Verify PapillonKit
-        run: |
-          echo "Current directory:"
-          pwd
-
-          echo "Checking PapillonKit:"
-          ls -lah PapillonKit/
-
-          test -f PapillonKit/papillonkit-1.0.0.tgz
+          package-manager-cache: false
 
       - name: Install dependencies
-        run: |
-          npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Check Expo
         run: |
@@ -37,8 +26,7 @@ jobs:
           node -p "require('./node_modules/expo/package.json').version"
 
       - name: Expo prebuild iOS
-        run: |
-          npx expo prebuild --platform ios --clean
+        run: npx expo prebuild --platform ios --clean
 
       - name: Install CocoaPods
         run: |
