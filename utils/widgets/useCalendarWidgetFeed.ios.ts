@@ -1,4 +1,4 @@
-import * as PapillonKit from "papillonkit";
+import * as PapillonKit from "@getpapillon/papillonkit";
 import { useEffect, useMemo } from "react";
 
 import { useTimetableWidgetData } from "@/app/(tabs)/index/hooks/useTimetableWidgetData";
@@ -7,7 +7,7 @@ import { warn } from "@/utils/logger/logger";
 import { getSubjectColor } from "@/utils/subjects/colors";
 import { getSubjectName } from "@/utils/subjects/name";
 
-export const useCalendarWidgetFeed = () => {
+const useFeed = () => {
   const { upcomingDays, loading } = useTimetableWidgetData({ showCancelled: true });
 
   const events = useMemo(
@@ -35,3 +35,5 @@ export const useCalendarWidgetFeed = () => {
     PapillonKit.widgets.setCalendarFeed(events).catch(error => warn(`Calendar widget feed failed: ${error}`));
   }, [events, loading]);
 };
+
+export const useCalendarWidgetFeed = PapillonKit.features.widgets ? useFeed : () => {};
