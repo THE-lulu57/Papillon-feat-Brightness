@@ -1,8 +1,8 @@
 import { Papicons } from "@getpapillon/papicons";
-import { useHeaderHeight, useTheme } from "expo-router/react-navigation";
+import { HeaderBackButton, useHeaderHeight, useTheme } from "expo-router/react-navigation";
 import * as ImagePicker from "expo-image-picker"
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -42,6 +42,14 @@ export default function CustomProfileScreen() {
       setProfilePictureUrl(account.customisation?.profilePicture ? `data:image/png;base64,${account.customisation.profilePicture}` : null);
     }
   }, [account]);
+
+  // Saved however the screen is left: the header button, the Android system
+  // back or a swipe-to-dismiss, which skip any button handler.
+  const nameRef = useRef({ firstName, lastName });
+  nameRef.current = { firstName, lastName };
+  useEffect(() => () => {
+    useAccountStore.getState().setAccountName(lastUsedAccount, nameRef.current.firstName, nameRef.current.lastName);
+  }, [lastUsedAccount]);
 
   const insets = useSafeAreaInsets()
 
@@ -165,18 +173,16 @@ export default function CustomProfileScreen() {
             />
           </View>
         </View>
-        <NativeHeaderSide side="Left" key={`${firstName}-${lastName}`}>
-          <NativeHeaderPressable
-            onPressIn={() => {
-              useAccountStore.getState().setAccountName(lastUsedAccount, firstName, lastName);
-              router.back();
-            }}
-          >
-            <Icon papicon size={26}>
-              <Papicons name="ArrowLeft" />
-            </Icon>
-          </NativeHeaderPressable>
-
+        <NativeHeaderSide side="Left">
+          {Platform.OS === "android" ? (
+            <HeaderBackButton onPress={() => router.back()} />
+          ) : (
+            <NativeHeaderPressable onPressIn={() => router.back()}>
+              <Icon papicon size={26}>
+                <Papicons name="ArrowLeft" />
+              </Icon>
+            </NativeHeaderPressable>
+          )}
         </NativeHeaderSide>
       </ScrollView>
     </ KeyboardAvoidingView >
