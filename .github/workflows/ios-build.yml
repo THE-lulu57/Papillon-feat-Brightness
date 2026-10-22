@@ -26,6 +26,11 @@ jobs:
       - name: Expo prebuild iOS
         run: npx expo prebuild --platform ios --clean
 
+      - name: Patch Podfile (skip App Intents metadata sur PapillonKit)
+        run: |
+          perl -0pi -e 's/post_install do \|installer\|/post_install do |installer|\n    installer.pods_project.targets.each do |t|\n      next unless t.name.start_with?("PapillonKit")\n      t.build_configurations.each do |c|\n        c.build_settings["LM_SKIP_METADATA_EXTRACTION"] = "YES"\n      end\n    end/' ios/Podfile
+          grep -n -A6 "post_install" ios/Podfile
+
       - name: Install CocoaPods
         working-directory: ios
         run: pod install
