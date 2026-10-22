@@ -42,8 +42,7 @@ jobs:
             -archivePath build/Papillon.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            DEVELOPMENT_TEAM= \
-            SKIP_INSTALL=NO
+            DEVELOPMENT_TEAM= 
 
       - name: Create IPA
         run: |
